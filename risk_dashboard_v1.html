@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Regime Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111318;
+    --surface2: #181c22;
+    --border: #232830;
+    --border2: #2d3440;
+    --text: #c8d0dc;
+    --muted: #5a6475;
+    --accent: #e8a020;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --amber: #f39c12;
+    --blue: #3498db;
+    --risk-on: #1a3a2a;
+    --risk-on-border: #2ecc71;
+    --neutral: #2a2a1a;
+    --neutral-border: #f39c12;
+    --risk-off: #3a1a1a;
+    --risk-off-border: #e74c3c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  /* Subtle scanline texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .header-left p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .date-display {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .date-display span {
+    display: block;
+    color: var(--text);
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  /* Regime Banner */
+  .regime-banner {
+    padding: 20px 24px;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.4s ease;
+  }
+
+  .regime-banner.risk-on { background: var(--risk-on); border-color: var(--risk-on-border); }
+  .regime-banner.neutral { background: var(--neutral); border-color: var(--neutral-border); }
+  .regime-banner.risk-off { background: var(--risk-off); border-color: var(--risk-off-border); }
+  .regime-banner.pending { background: var(--surface); border-color: var(--border2); }
+
+  .regime-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .regime-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .regime-banner.risk-on .regime-value { color: var(--green); }
+  .regime-banner.neutral .regime-value { color: var(--amber); }
+  .regime-banner.risk-off .regime-value { color: var(--red); }
+  .regime-banner.pending .regime-value { color: var(--muted); }
+
+  .regime-note {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 420px;
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  .score-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 80px;
+  }
+
+  .score-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    transition: all 0.4s;
+  }
+
+  .score-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Grid layout */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Indicator card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    transition: border-color 0.3s;
+  }
+
+  .card:hover { border-color: var(--border2); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .card-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border2);
+    transition: background 0.3s;
+  }
+
+  .card-status.bullish { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .card-status.neutral { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .card-status.bearish { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  .card-label {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  /* Input styles */
+  .input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .num-input {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    padding: 8px 10px;
+    border-radius: 3px;
+    width: 100px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .num-input:focus { border-color: var(--accent); }
+
+  .num-input::placeholder { color: var(--muted); font-size: 13px; }
+
+  .seg-group {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .seg-btn {
+    flex: 1;
+    padding: 8px 6px;
+    background: var(--surface2);
+    border: none;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-right: 1px solid var(--border2);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .seg-btn:last-child { border-right: none; }
+  .seg-btn:hover { background: var(--border); color: var(--text); }
+  .seg-btn.active-bull { background: rgba(46,204,113,0.15); color: var(--green); }
+  .seg-btn.active-neut { background: rgba(243,156,18,0.15); color: var(--amber); }
+  .seg-btn.active-bear { background: rgba(231,76,60,0.15); color: var(--red); }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.4;
+  }
+
+  .input-unit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Section title */
+  .section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* Evaluate button */
+  .eval-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #0a0c0f;
+    border: none;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .eval-btn:hover { background: #f5b030; transform: translateY(-1px); }
+  .eval-btn:active { transform: translateY(0); }
+
+  /* Log section */
+  .log-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .log-entry {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .log-entry:last-child { border-bottom: none; }
+
+  .log-time { color: var(--muted); min-width: 70px; }
+  .log-regime { min-width: 80px; }
+  .log-regime.risk-on { color: var(--green); }
+  .log-regime.neutral { color: var(--amber); }
+  .log-regime.risk-off { color: var(--red); }
+  .log-detail { color: var(--text); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Checklist result */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 3px;
+    border-left: 3px solid var(--border2);
+    transition: border-color 0.3s;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .check-item.bull { border-left-color: var(--green); }
+  .check-item.neut { border-left-color: var(--amber); }
+  .check-item.bear { border-left-color: var(--red); }
+
+  .check-icon { font-size: 13px; min-width: 16px; }
+  .check-text { color: var(--text); flex: 1; }
+  .check-signal { font-size: 10px; color: var(--muted); }
+
+  /* Reset */
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .reset-btn:hover { color: var(--text); border-color: var(--text); }
+
+  .header-actions { display: flex; align-items: center; gap: 12px; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .grid, .grid-3 { grid-template-columns: 1fr; }
+    .regime-banner { flex-direction: column; gap: 16px; }
+    .regime-note { text-align: left; max-width: 100%; }
+    body { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Market Regime Dashboard</h1>
+      <p>C.OG Lesson 2 Framework // Daily Pre-Session Check</p>
+    </div>
+    <div class="header-actions">
+      <button class="reset-btn" onclick="resetAll()">Reset</button>
+      <div class="date-display">
+        <span id="dateDisplay"></span>
+        <span id="timeDisplay"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Regime Banner -->
+  <div class="regime-banner pending" id="regimeBanner">
+    <div>
+      <div class="regime-label">Current Regime Assessment</div>
+      <div class="regime-value" id="regimeValue">AWAITING INPUT</div>
+    </div>
+    <div class="score-ring">
+      <div class="score-circle" id="scoreCircle">—</div>
+      <div class="score-label">Score</div>
+    </div>
+    <div class="regime-note" id="regimeNote">
+      Enter today's readings below, then press Evaluate to assess the current market regime.
+    </div>
+  </div>
+
+  <!-- SECTION 1: Volatility -->
+  <div class="section-title">01 — Volatility & Fear</div>
+  <div class="grid" style="margin-bottom:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">VIX Level</span>
+        <div class="card-status" id="dot-vix"></div>
+      </div>
+      <div class="card-label">CBOE Volatility Index spot level</div>
+      <div class="input-group">
+        <input type="number" class="num-input" id="vix" placeholder="e.g. 18" step="0.1" min="5" max="90" oninput="autoEval()">
+        <span class="input-unit">pts</span>
+      </div>
+      <div class="hint" id="hint-vix">— / Sub-15 calm · 15-25 normal · 25-35 elevated · 35+ panic</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">VIX Term Structure</span>
+        <div class="card-status" id="dot-vixterm"></div>
+      </div>
+      <div class="card-label">Shape of the VIX futures curve</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="vixterm-contango" onclick="setSeg('vixterm','contango','bull')">Contango ↗</button>
+        <button class="seg-btn" id="vixterm-flat" onclick="setSeg('vixterm','flat','neut')">Flat</button>
+        <button class="seg-btn" id="vixterm-backwardation" onclick="setSeg('vixterm','backwardation','bear')">Backwdtn ↘</button>
+      </div>
+      <div class="hint">Contango = calm · Backwardation = fear / hedging demand</div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 2: Credit -->
+  <div class="section-title">02 — Credit & Funding Stress</div>
+  <div class="grid" style="margin-bottom:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">HY Credit Spread (OAS)</span>
+        <div class="card-status" id="dot-hy"></div>
+      </div>
+      <div class="card-label">High Yield option-adjusted spread</div>
+      <div class="input-group">
+        <input type="number" class="num-input" id="hy" placeholder="e.g. 320" step="5" min="100" max="1500" oninput="autoEval()">
+        <span class="input-unit">bps</span>
+      </div>
+      <div class="hint" id="hint-hy">— / Below 350 risk-on · 350-500 caution · Above 500 risk-off</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">HY Spread Direction</span>
+        <div class="card-status" id="dot-hydirn"></div>
+      </div>
+      <div class="card-label">Is the spread widening or tightening?</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="hydirn-tightening" onclick="setSeg('hydirn','tightening','bull')">Tightening ↓</button>
+        <button class="seg-btn" id="hydirn-stable" onclick="setSeg('hydirn','stable','neut')">Stable</button>
+        <button class="seg-btn" id="hydirn-widening" onclick="setSeg('hydirn','widening','bear')">Widening ↑</button>
+      </div>
+      <div class="hint">Widening &gt;20bps in a day = early warning signal</div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 3: FX -->
+  <div class="section-title">03 — FX Risk Proxies</div>
+  <div class="grid" style="margin-bottom:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">JPY Direction</span>
+        <div class="card-status" id="dot-jpy"></div>
+      </div>
+      <div class="card-label">Japanese Yen vs USD (USD/JPY)</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="jpy-weakening" onclick="setSeg('jpy','weakening','bull')">JPY Weak ↑</button>
+        <button class="seg-btn" id="jpy-stable" onclick="setSeg('jpy','stable','neut')">Stable</button>
+        <button class="seg-btn" id="jpy-strengthening" onclick="setSeg('jpy','strengthening','bear')">JPY Strong ↓</button>
+      </div>
+      <div class="hint">JPY strengthening = risk-off / carry unwind in progress</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">AUD/JPY Direction</span>
+        <div class="card-status" id="dot-audjpy"></div>
+      </div>
+      <div class="card-label">Best single risk-on/off proxy pair</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="audjpy-rising" onclick="setSeg('audjpy','rising','bull')">Rising ↑</button>
+        <button class="seg-btn" id="audjpy-stable" onclick="setSeg('audjpy','stable','neut')">Stable</button>
+        <button class="seg-btn" id="audjpy-falling" onclick="setSeg('audjpy','falling','bear')">Falling ↓</button>
+      </div>
+      <div class="hint">Falling AUD/JPY = carry unwind / risk-off signal</div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 4: Rates -->
+  <div class="section-title">04 — Rates & Yield Curve</div>
+  <div class="grid-3" style="margin-bottom:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">US 2Y Yield</span>
+        <div class="card-status" id="dot-2y"></div>
+      </div>
+      <div class="card-label">Most policy-sensitive tenor</div>
+      <div class="input-group">
+        <input type="number" class="num-input" id="yield2y" placeholder="e.g. 4.35" step="0.01" min="0" max="15" oninput="autoEval()">
+        <span class="input-unit">%</span>
+      </div>
+      <div class="hint">Direction matters more than level</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">2Y Direction</span>
+        <div class="card-status" id="dot-2ydirn"></div>
+      </div>
+      <div class="card-label">Is the 2Y yield rising or falling?</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="y2dirn-falling" onclick="setSeg('y2dirn','falling','bull')">Falling ↓</button>
+        <button class="seg-btn" id="y2dirn-stable" onclick="setSeg('y2dirn','stable','neut')">Stable</button>
+        <button class="seg-btn" id="y2dirn-rising" onclick="setSeg('y2dirn','rising','bear')">Rising ↑</button>
+      </div>
+      <div class="hint">Rising 2Y = tighter conditions ahead</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">2Y–10Y Curve</span>
+        <div class="card-status" id="dot-curve"></div>
+      </div>
+      <div class="card-label">Yield curve slope</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="curve-steep" onclick="setSeg('curve','steep','bull')">Steep +</button>
+        <button class="seg-btn" id="curve-flat" onclick="setSeg('curve','flat','neut')">Flat</button>
+        <button class="seg-btn" id="curve-inverted" onclick="setSeg('curve','inverted','bear')">Inverted</button>
+      </div>
+      <div class="hint">Inversion = recession signal 6-18m ahead</div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 5: Stocks & Gold -->
+  <div class="section-title">05 — Equities & Safe Havens</div>
+  <div class="grid" style="margin-bottom:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Stocks vs Bonds Correlation</span>
+        <div class="card-status" id="dot-corr"></div>
+      </div>
+      <div class="card-label">Are stocks and bonds moving together or opposite?</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="corr-negative" onclick="setSeg('corr','negative','bull')">Negative (normal)</button>
+        <button class="seg-btn" id="corr-positive" onclick="setSeg('corr','positive','bear')">Positive (stress)</button>
+      </div>
+      <div class="hint">Both falling together = normal relationships broken</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Gold Direction</span>
+        <div class="card-status" id="dot-gold"></div>
+      </div>
+      <div class="card-label">Gold & Treasuries both rising = flight to quality</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="gold-falling" onclick="setSeg('gold','falling','bull')">Falling ↓</button>
+        <button class="seg-btn" id="gold-stable" onclick="setSeg('gold','stable','neut')">Stable</button>
+        <button class="seg-btn" id="gold-rising" onclick="setSeg('gold','rising','bear')">Rising ↑</button>
+      </div>
+      <div class="hint">Gold rising with USTs = classic flight-to-quality signal</div>
+    </div>
+
+  </div>
+
+  <!-- Evaluate -->
+  <button class="eval-btn" onclick="evaluate()">▶ Evaluate Regime</button>
+
+  <!-- Results checklist -->
+  <div id="resultSection" style="display:none">
+    <div class="section-title">Regime Breakdown</div>
+    <div class="checklist" id="checklist"></div>
+  </div>
+
+  <!-- Log -->
+  <div class="log-section" id="logSection" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin:0;border:none;padding:0">Session Log</div>
+      <button class="reset-btn" onclick="clearLog()">Clear</button>
+    </div>
+    <div id="logEntries"></div>
+  </div>
+
+</div>
+
+<script>
+  const segState = {};
+
+  function setSeg(group, value, type) {
+    segState[group] = { value, type };
+    // Clear all buttons in group
+    document.querySelectorAll(`[id^="${group}-"]`).forEach(btn => {
+      btn.className = 'seg-btn';
+    });
+    // Activate selected
+    const btn = document.getElementById(`${group}-${value}`);
+    if (btn) btn.classList.add(`active-${type}`);
+    // Update dot
+    const dot = document.getElementById(`dot-${group}`);
+    if (dot) {
+      dot.className = 'card-status';
+      if (type === 'bull') dot.classList.add('bullish');
+      else if (type === 'neut') dot.classList.add('neutral');
+      else if (type === 'bear') dot.classList.add('bearish');
+    }
+    autoEval();
+  }
+
+  function autoEval() {
+    // Silent auto-eval to update dots
+    const vix = parseFloat(document.getElementById('vix').value);
+    const hy = parseFloat(document.getElementById('hy').value);
+
+    // Update VIX hint
+    if (!isNaN(vix)) {
+      const dot = document.getElementById('dot-vix');
+      dot.className = 'card-status';
+      const hint = document.getElementById('hint-vix');
+      if (vix < 15) { dot.classList.add('bullish'); hint.textContent = `${vix} — Calm. Risk-on conditions.`; }
+      else if (vix < 25) { dot.classList.add('neutral'); hint.textContent = `${vix} — Normal. Monitor for changes.`; }
+      else if (vix < 35) { dot.classList.add('bearish'); hint.textContent = `${vix} — Elevated stress. Reduce exposure.`; }
+      else { dot.classList.add('bearish'); hint.textContent = `${vix} — PANIC. Crisis mode. Cash is king.`; }
+    }
+
+    // Update HY hint
+    if (!isNaN(hy)) {
+      const dot = document.getElementById('dot-hy');
+      dot.className = 'card-status';
+      const hint = document.getElementById('hint-hy');
+      if (hy < 350) { dot.classList.add('bullish'); hint.textContent = `${hy}bps — Risk-on territory.`; }
+      else if (hy < 500) { dot.classList.add('neutral'); hint.textContent = `${hy}bps — Caution zone. Watch closely.`; }
+      else { dot.classList.add('bearish'); hint.textContent = `${hy}bps — Risk-off. Stress elevated.`; }
+    }
+  }
+
+  function evaluate() {
+    const vix = parseFloat(document.getElementById('vix').value);
+    const hy = parseFloat(document.getElementById('hy').value);
+
+    let score = 0;
+    let total = 0;
+    let checks = [];
+
+    // VIX Level
+    if (!isNaN(vix)) {
+      total++;
+      if (vix < 15) {
+        score += 1; checks.push({ type:'bull', icon:'✓', text:`VIX ${vix} — Calm. Sub-15 = risk-on environment.`, signal:'RISK-ON' });
+      } else if (vix < 25) {
+        score += 0.5; checks.push({ type:'neut', icon:'~', text:`VIX ${vix} — Normal. No extreme signal.`, signal:'NEUTRAL' });
+      } else if (vix < 35) {
+        checks.push({ type:'bear', icon:'✗', text:`VIX ${vix} — Elevated stress. Reduce gross exposure.`, signal:'CAUTION' });
+      } else {
+        checks.push({ type:'bear', icon:'✗', text:`VIX ${vix} — PANIC level. Cash is king.`, signal:'RISK-OFF' });
+      }
+    }
+
+    // VIX term structure
+    if (segState.vixterm) {
+      total++;
+      const v = segState.vixterm;
+      if (v.value === 'contango') { score += 1; checks.push({ type:'bull', icon:'✓', text:'VIX term structure in contango — market is calm, no hedging panic.', signal:'RISK-ON' }); }
+      else if (v.value === 'flat') { score += 0.5; checks.push({ type:'neut', icon:'~', text:'VIX term structure flat — transitioning. Watch for direction.', signal:'NEUTRAL' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:'VIX term structure in backwardation — fear elevated. Hedging demand spiking.', signal:'RISK-OFF' }); }
+    }
+
+    // HY spread
+    if (!isNaN(hy)) {
+      total++;
+      if (hy < 350) { score += 1; checks.push({ type:'bull', icon:'✓', text:`HY spread ${hy}bps — Credit markets relaxed. Risk appetite healthy.`, signal:'RISK-ON' }); }
+      else if (hy < 500) { score += 0.5; checks.push({ type:'neut', icon:'~', text:`HY spread ${hy}bps — Caution zone. Monitor for further widening.`, signal:'CAUTION' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:`HY spread ${hy}bps — Stress elevated. Risk-off in credit.`, signal:'RISK-OFF' }); }
+    }
+
+    // HY direction
+    if (segState.hydirn) {
+      total++;
+      const v = segState.hydirn;
+      if (v.value === 'tightening') { score += 1; checks.push({ type:'bull', icon:'✓', text:'Credit spreads tightening — risk appetite expanding.', signal:'RISK-ON' }); }
+      else if (v.value === 'stable') { score += 0.5; checks.push({ type:'neut', icon:'~', text:'Credit spreads stable — no strong directional signal.', signal:'NEUTRAL' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:'Credit spreads widening — early warning. Reduce exposure if >20bps/day.', signal:'CAUTION' }); }
+    }
+
+    // JPY
+    if (segState.jpy) {
+      total++;
+      const v = segState.jpy;
+      if (v.value === 'weakening') { score += 1; checks.push({ type:'bull', icon:'✓', text:'JPY weakening — carry trades intact. Risk appetite supportive.', signal:'RISK-ON' }); }
+      else if (v.value === 'stable') { score += 0.5; checks.push({ type:'neut', icon:'~', text:'JPY stable — no carry unwind signal currently.', signal:'NEUTRAL' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:'JPY strengthening — carry unwind in progress. Risk-off flows active.', signal:'RISK-OFF' }); }
+    }
+
+    // AUD/JPY
+    if (segState.audjpy) {
+      total++;
+      const v = segState.audjpy;
+      if (v.value === 'rising') { score += 1; checks.push({ type:'bull', icon:'✓', text:'AUD/JPY rising — best risk-on proxy confirming appetite.', signal:'RISK-ON' }); }
+      else if (v.value === 'stable') { score += 0.5; checks.push({ type:'neut', icon:'~', text:'AUD/JPY stable — no strong regime signal from FX.', signal:'NEUTRAL' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:'AUD/JPY falling — classic risk-off / carry unwind signal. High alert.', signal:'RISK-OFF' }); }
+    }
+
+    // 2Y direction
+    if (segState.y2dirn) {
+      total++;
+      const v = segState.y2dirn;
+      if (v.value === 'falling') { score += 1; checks.push({ type:'bull', icon:'✓', text:'2Y yield falling — markets pricing easier conditions ahead. Growth supportive.', signal:'RISK-ON' }); }
+      else if (v.value === 'stable') { score += 0.5; checks.push({ type:'neut', icon:'~', text:'2Y yield stable — no strong rate direction signal.', signal:'NEUTRAL' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:'2Y yield rising — tighter conditions being priced in. Headwind for growth/risk.', signal:'CAUTION' }); }
+    }
+
+    // Yield curve
+    if (segState.curve) {
+      total++;
+      const v = segState.curve;
+      if (v.value === 'steep') { score += 1; checks.push({ type:'bull', icon:'✓', text:'Yield curve steepening — healthy growth expectations. No recession signal.', signal:'RISK-ON' }); }
+      else if (v.value === 'flat') { score += 0.5; checks.push({ type:'neut', icon:'~', text:'Yield curve flat — watch for inversion. Slowing growth environment.', signal:'NEUTRAL' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:'Yield curve inverted — historical recession signal. 6-18 month lead time.', signal:'WARNING' }); }
+    }
+
+    // Correlation
+    if (segState.corr) {
+      total++;
+      const v = segState.corr;
+      if (v.value === 'negative') { score += 1; checks.push({ type:'bull', icon:'✓', text:'Stocks/bonds negatively correlated — normal regime. Diversification working.', signal:'NORMAL' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:'Stocks/bonds positively correlated — normal relationships broken. Heightened risk.', signal:'STRESS' }); }
+    }
+
+    // Gold
+    if (segState.gold) {
+      total++;
+      const v = segState.gold;
+      if (v.value === 'falling') { score += 1; checks.push({ type:'bull', icon:'✓', text:'Gold falling — real rates rising or risk appetite supportive. No flight-to-quality.', signal:'RISK-ON' }); }
+      else if (v.value === 'stable') { score += 0.5; checks.push({ type:'neut', icon:'~', text:'Gold stable — no strong directional signal from safe havens.', signal:'NEUTRAL' }); }
+      else { checks.push({ type:'bear', icon:'✗', text:'Gold rising — watch if USTs also rising. Classic flight-to-quality = risk-off.', signal:'CAUTION' }); }
+    }
+
+    if (total === 0) {
+      alert('Please enter at least one reading before evaluating.');
+      return;
+    }
+
+    const pct = score / total;
+    let regime, regimeClass, note;
+
+    if (pct >= 0.65) {
+      regime = 'RISK-ON'; regimeClass = 'risk-on';
+      note = 'Indicators broadly supportive. Risk appetite healthy. Standard position sizing appropriate. Monitor for regime shifts.';
+    } else if (pct >= 0.35) {
+      regime = 'NEUTRAL / MIXED'; regimeClass = 'neutral';
+      note = 'Mixed signals. No strong directional regime. Reduce size on speculative positions. Wait for clearer alignment before adding risk.';
+    } else {
+      regime = 'RISK-OFF'; regimeClass = 'risk-off';
+      note = '3+ indicators flashing warning. Consider reducing gross exposure. Avoid chasing entries. Let the regime clarify before deploying capital.';
+    }
+
+    const scoreDisplay = Math.round(pct * 100);
+
+    // Update banner
+    const banner = document.getElementById('regimeBanner');
+    banner.className = `regime-banner ${regimeClass}`;
+    document.getElementById('regimeValue').textContent = regime;
+    document.getElementById('regimeNote').textContent = note;
+
+    const circle = document.getElementById('scoreCircle');
+    circle.textContent = scoreDisplay;
+    if (pct >= 0.65) circle.style.color = 'var(--green)';
+    else if (pct >= 0.35) circle.style.color = 'var(--amber)';
+    else circle.style.color = 'var(--red)';
+
+    // Render checklist
+    const cl = document.getElementById('checklist');
+    cl.innerHTML = '';
+    checks.forEach((c, i) => {
+      const div = document.createElement('div');
+      div.className = `check-item ${c.type}`;
+      div.style.animationDelay = `${i * 0.05}s`;
+      div.innerHTML = `<span class="check-icon">${c.icon}</span><span class="check-text">${c.text}</span><span class="check-signal">${c.signal}</span>`;
+      cl.appendChild(div);
+    });
+
+    document.getElementById('resultSection').style.display = 'block';
+
+    // Add to log
+    addLog(regime, regimeClass, scoreDisplay, total);
+  }
+
+  const log = [];
+
+  function addLog(regime, cls, score, indicators) {
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    const date = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+    log.unshift({ time: `${date} ${time}`, regime, cls, score, indicators });
+    renderLog();
+    document.getElementById('logSection').style.display = 'block';
+  }
+
+  function renderLog() {
+    const container = document.getElementById('logEntries');
+    container.innerHTML = '';
+    log.slice(0, 8).forEach(entry => {
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = `<span class="log-time">${entry.time}</span><span class="log-regime ${entry.cls}">${entry.regime}</span><span class="log-detail">Score ${entry.score}/100 · ${entry.indicators} indicators</span>`;
+      container.appendChild(div);
+    });
+  }
+
+  function clearLog() {
+    log.length = 0;
+    document.getElementById('logSection').style.display = 'none';
+  }
+
+  function resetAll() {
+    document.getElementById('vix').value = '';
+    document.getElementById('hy').value = '';
+    document.getElementById('yield2y').value = '';
+
+    // Reset all seg buttons
+    ['vixterm','hydirn','jpy','audjpy','y2dirn','curve','corr','gold'].forEach(g => {
+      delete segState[g];
+      document.querySelectorAll(`[id^="${g}-"]`).forEach(btn => btn.className = 'seg-btn');
+      const dot = document.getElementById(`dot-${g}`);
+      if (dot) dot.className = 'card-status';
+    });
+
+    ['dot-vix','dot-hy'].forEach(id => {
+      const d = document.getElementById(id);
+      if (d) d.className = 'card-status';
+    });
+
+    document.getElementById('hint-vix').textContent = '— / Sub-15 calm · 15-25 normal · 25-35 elevated · 35+ panic';
+    document.getElementById('hint-hy').textContent = '— / Below 350 risk-on · 350-500 caution · Above 500 risk-off';
+
+    const banner = document.getElementById('regimeBanner');
+    banner.className = 'regime-banner pending';
+    document.getElementById('regimeValue').textContent = 'AWAITING INPUT';
+    document.getElementById('regimeNote').textContent = 'Enter today\'s readings below, then press Evaluate to assess the current market regime.';
+    document.getElementById('scoreCircle').textContent = '—';
+    document.getElementById('scoreCircle').style.color = '';
+    document.getElementById('resultSection').style.display = 'none';
+  }
+
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+    document.getElementById('timeDisplay').textContent = now.toLocaleTimeString('en-GB') + ' GMT';
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
+</body>
+</html>
