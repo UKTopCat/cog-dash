@@ -60,12 +60,12 @@
   .score-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; transition: border-color 0.3s; position: relative; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; transition: border-color 0.3s; }
   .card:hover { border-color: var(--border2); }
-  .auto-badge { position: absolute; top: 10px; right: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; background: rgba(232,160,32,0.12); color: var(--accent); border: 1px solid rgba(232,160,32,0.3); border-radius: 2px; padding: 2px 6px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0; transition: opacity 0.4s; }
+  .auto-badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; background: rgba(232,160,32,0.12); color: var(--accent); border: 1px solid rgba(232,160,32,0.3); border-radius: 2px; padding: 2px 6px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0; transition: opacity 0.4s; white-space: nowrap; }
   .auto-badge.visible { opacity: 1; }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .card-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+  .card-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); flex: 1; }
   .card-status { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); transition: background 0.3s; }
   .card-status.bullish { background: var(--green); box-shadow: 0 0 6px var(--green); }
   .card-status.neutral { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
@@ -203,8 +203,7 @@
   <div class="section-title">02 — Credit &amp; Funding Stress <span class="tag tag-auto">⚡ Auto-filled · FRED</span></div>
   <div class="grid" style="margin-bottom:16px">
     <div class="card">
-      <div class="auto-badge" id="badge-hy">⚡ Auto</div>
-      <div class="card-header"><span class="card-title">HY Credit Spread (OAS)</span><div class="card-status" id="dot-hy"></div></div>
+      <div class="card-header"><span class="card-title">HY Credit Spread (OAS)</span><span class="auto-badge" id="badge-hy">⚡ Auto</span><div class="card-status" id="dot-hy"></div></div>
       <div class="card-label">High Yield OAS · FRED: BAMLH0A0HYM2</div>
       <div class="input-group">
         <input type="number" class="num-input" id="hy" placeholder="Loading..." step="5" min="100" max="1500" oninput="autoEval()">
@@ -213,8 +212,7 @@
       <div class="hint" id="hint-hy">— / Below 350 risk-on · 350-500 caution · Above 500 risk-off</div>
     </div>
     <div class="card">
-      <div class="auto-badge" id="badge-hydirn">⚡ Auto</div>
-      <div class="card-header"><span class="card-title">HY Spread Direction</span><div class="card-status" id="dot-hydirn"></div></div>
+      <div class="card-header"><span class="card-title">HY Spread Direction</span><span class="auto-badge" id="badge-hydirn">⚡ Auto</span><div class="card-status" id="dot-hydirn"></div></div>
       <div class="card-label">Auto-derived — today vs previous FRED observation</div>
       <div class="seg-group">
         <button class="seg-btn" id="hydirn-tightening" onclick="setSeg('hydirn','tightening','bull')">Tightening ↓</button>
@@ -252,8 +250,7 @@
   <div class="section-title">04 — Rates &amp; Yield Curve <span class="tag tag-auto">⚡ Auto-filled · FRED</span></div>
   <div class="grid-3" style="margin-bottom:16px">
     <div class="card">
-      <div class="auto-badge" id="badge-2y">⚡ Auto</div>
-      <div class="card-header"><span class="card-title">US 2Y Yield</span><div class="card-status" id="dot-2y"></div></div>
+      <div class="card-header"><span class="card-title">US 2Y Yield</span><span class="auto-badge" id="badge-2y">⚡ Auto</span><div class="card-status" id="dot-2y"></div></div>
       <div class="card-label">Policy-sensitive tenor · FRED: DGS2</div>
       <div class="input-group">
         <input type="number" class="num-input" id="yield2y" placeholder="Loading..." step="0.01" min="0" max="15" oninput="autoEval()">
@@ -262,8 +259,7 @@
       <div class="hint">Direction matters more than absolute level</div>
     </div>
     <div class="card">
-      <div class="auto-badge" id="badge-2ydirn">⚡ Auto</div>
-      <div class="card-header"><span class="card-title">2Y Direction</span><div class="card-status" id="dot-2ydirn"></div></div>
+      <div class="card-header"><span class="card-title">2Y Direction</span><span class="auto-badge" id="badge-2ydirn">⚡ Auto</span><div class="card-status" id="dot-2ydirn"></div></div>
       <div class="card-label">Auto-derived — today vs previous FRED observation</div>
       <div class="seg-group">
         <button class="seg-btn" id="y2dirn-falling" onclick="setSeg('y2dirn','falling','bull')">Falling ↓</button>
@@ -273,8 +269,7 @@
       <div class="hint">Rising 2Y = tighter conditions being priced in</div>
     </div>
     <div class="card">
-      <div class="auto-badge" id="badge-curve">⚡ Auto</div>
-      <div class="card-header"><span class="card-title">2Y–10Y Curve</span><div class="card-status" id="dot-curve"></div></div>
+      <div class="card-header"><span class="card-title">2Y–10Y Curve</span><span class="auto-badge" id="badge-curve">⚡ Auto</span><div class="card-status" id="dot-curve"></div></div>
       <div class="card-label">Yield curve slope · FRED: T10Y2Y</div>
       <div class="seg-group">
         <button class="seg-btn" id="curve-steep" onclick="setSeg('curve','steep','bull')">Steep +</button>
