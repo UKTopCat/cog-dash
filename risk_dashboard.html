@@ -303,7 +303,7 @@
     </div>
   </div>
 
-  <button class="eval-btn" onclick="evaluate()">▶ Evaluate Regime</button>
+  <button class="eval-btn" onclick="evaluateRegime()">▶ Evaluate Regime</button>
 
   <div id="resultSection" style="display:none">
     <div class="section-title">Regime Breakdown</div>
@@ -460,7 +460,7 @@
     }
   }
 
-  function evaluate() {
+  function evaluateRegime() {
     const vix=parseFloat(document.getElementById('vix').value);
     const hy=parseFloat(document.getElementById('hy').value);
     let score=0, total=0, checks=[];
