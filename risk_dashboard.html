@@ -10,7 +10,7 @@
     --bg: #0a0c0f; --surface: #111318; --surface2: #181c22;
     --border: #232830; --border2: #2d3440; --text: #c8d0dc;
     --muted: #5a6475; --accent: #e8a020; --green: #2ecc71;
-    --red: #e74c3c; --amber: #f39c12; --blue: #3498db;
+    --red: #e74c3c; --amber: #f39c12;
     --risk-on: #1a3a2a; --risk-on-border: #2ecc71;
     --neutral: #2a2a1a; --neutral-border: #f39c12;
     --risk-off: #3a1a1a; --risk-off-border: #e74c3c;
@@ -19,30 +19,31 @@
   body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; min-height: 100vh; padding: 24px; }
   body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px); pointer-events: none; z-index: 0; }
   .container { max-width: 960px; margin: 0 auto; position: relative; z-index: 1; }
+
   .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
   .header-left h1 { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
-  .header-left p { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; }
+  .header-left p { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
   .date-display { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); text-align: right; }
   .date-display span { display: block; color: var(--text); font-size: 13px; margin-bottom: 2px; }
   .header-actions { display: flex; align-items: center; gap: 12px; }
 
   /* FRED bar */
   .fred-bar { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .fred-bar-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); flex: 1; min-width: 160px; }
+  .fred-bar-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); flex: 1; min-width: 160px; }
   .fred-bar-label strong { display: block; color: var(--accent); font-size: 13px; margin-bottom: 3px; }
   .fred-fields { display: flex; gap: 24px; flex-wrap: wrap; flex: 2; }
   .fred-field { display: flex; flex-direction: column; gap: 2px; min-width: 80px; }
   .fred-field-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
   .fred-field-value { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; color: var(--muted); transition: color 0.3s; }
   .fred-field-value.loaded { color: var(--text); }
-  .fred-field-sub { font-size: 10px; font-family: 'IBM Plex Mono', monospace; }
+  .fred-field-sub { font-size: 10px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); }
   .fred-field-sub.up { color: var(--red); }
   .fred-field-sub.down { color: var(--green); }
-  .fred-field-sub.flat { color: var(--muted); }
+
   .fetch-btn { padding: 10px 20px; background: var(--accent); color: #0a0c0f; border: none; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
   .fetch-btn:hover { background: #f5b030; }
   .fetch-btn:disabled { background: var(--border2); color: var(--muted); cursor: not-allowed; }
-  .fetch-status { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); text-align: right; min-width: 100px; }
+  .fetch-status { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); text-align: right; min-width: 120px; }
   .fetch-status.loading { color: var(--amber); }
   .fetch-status.success { color: var(--green); }
   .fetch-status.error { color: var(--red); }
@@ -64,11 +65,9 @@
   .score-circle { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; transition: all 0.4s; }
   .score-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
 
-  /* Grid */
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 
-  /* Card */
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; transition: border-color 0.3s; position: relative; }
   .card:hover { border-color: var(--border2); }
   .auto-badge { position: absolute; top: 10px; right: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; background: rgba(232,160,32,0.12); color: var(--accent); border: 1px solid rgba(232,160,32,0.3); border-radius: 2px; padding: 2px 6px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0; transition: opacity 0.4s; }
@@ -81,15 +80,15 @@
   .card-status.bearish { background: var(--red); box-shadow: 0 0 6px var(--red); }
   .card-label { font-size: 12px; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
 
-  /* Inputs */
   .num-input { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 15px; padding: 8px 10px; border-radius: 3px; width: 100px; transition: border-color 0.2s; outline: none; }
   .num-input:focus { border-color: var(--accent); }
   .num-input::placeholder { color: var(--muted); font-size: 13px; }
   .num-input.autofilled { border-color: rgba(232,160,32,0.5); background: rgba(232,160,32,0.05); }
-  .input-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .input-group { display: flex; gap: 8px; align-items: center; }
   .input-unit { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
-  .seg-group { display: flex; gap: 0; border: 1px solid var(--border2); border-radius: 3px; overflow: hidden; width: 100%; }
-  .seg-btn { flex: 1; padding: 8px 6px; background: var(--surface2); border: none; color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.15s; border-right: 1px solid var(--border2); letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .seg-group { display: flex; border: 1px solid var(--border2); border-radius: 3px; overflow: hidden; width: 100%; }
+  .seg-btn { flex: 1; padding: 8px 4px; background: var(--surface2); border: none; color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.15s; border-right: 1px solid var(--border2); letter-spacing: 0.03em; text-transform: uppercase; }
   .seg-btn:last-child { border-right: none; }
   .seg-btn:hover { background: var(--border); color: var(--text); }
   .seg-btn.active-bull { background: rgba(46,204,113,0.15); color: var(--green); }
@@ -97,7 +96,6 @@
   .seg-btn.active-bear { background: rgba(231,76,60,0.15); color: var(--red); }
   .hint { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: 'IBM Plex Mono', monospace; line-height: 1.4; }
 
-  /* Section titles */
   .section-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
   .section-title::before { content: ''; width: 3px; height: 12px; background: var(--accent); border-radius: 2px; }
   .tag { font-size: 9px; padding: 2px 6px; border-radius: 2px; letter-spacing: 0.06em; }
@@ -119,7 +117,7 @@
   .log-section { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-top: 16px; }
   .log-entry { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; color: var(--muted); animation: fadeIn 0.3s ease; }
   .log-entry:last-child { border-bottom: none; }
-  .log-time { color: var(--muted); min-width: 90px; }
+  .log-time { min-width: 90px; }
   .log-regime.risk-on { color: var(--green); }
   .log-regime.neutral { color: var(--amber); }
   .log-regime.risk-off { color: var(--red); }
@@ -160,27 +158,27 @@
   <div class="fred-bar">
     <div class="fred-bar-label">
       <strong>⚡ FRED Auto-Fill</strong>
-      Loads US 2Y yield, yield curve &amp; HY spread automatically. Then enter VIX &amp; FX from TradingView.
+      Loads US 2Y yield, yield curve &amp; HY spread. Then enter VIX &amp; FX from TradingView.
     </div>
     <div class="fred-fields">
       <div class="fred-field">
         <div class="fred-field-label">US 2Y Yield</div>
         <div class="fred-field-value" id="fred-2y">—</div>
-        <div class="fred-field-sub flat" id="fred-2y-chg"></div>
+        <div class="fred-field-sub" id="fred-2y-chg"></div>
       </div>
       <div class="fred-field">
         <div class="fred-field-label">2Y–10Y Spread</div>
         <div class="fred-field-value" id="fred-curve">—</div>
-        <div class="fred-field-sub flat" id="fred-curve-chg"></div>
+        <div class="fred-field-sub" id="fred-curve-chg"></div>
       </div>
       <div class="fred-field">
         <div class="fred-field-label">HY Spread (OAS)</div>
         <div class="fred-field-value" id="fred-hy">—</div>
-        <div class="fred-field-sub flat" id="fred-hy-chg"></div>
+        <div class="fred-field-sub" id="fred-hy-chg"></div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-      <button class="fetch-btn" id="fetchBtn" onclick="fetchFREDData()">▼ Load FRED Data</button>
+      <button class="fetch-btn" id="fetchBtn" onclick="fetchAll()">▼ Load FRED Data</button>
       <div class="fetch-status" id="fetchStatus">Not loaded</div>
     </div>
   </div>
@@ -195,10 +193,10 @@
       <div class="score-circle" id="scoreCircle">—</div>
       <div class="score-label">Score</div>
     </div>
-    <div class="regime-note" id="regimeNote">Click Load FRED Data above, then enter VIX and FX from TradingView. Press Evaluate to assess the regime.</div>
+    <div class="regime-note" id="regimeNote">Click Load FRED Data, then enter VIX and FX from TradingView. Press Evaluate.</div>
   </div>
 
-  <!-- 01: Volatility — Manual -->
+  <!-- 01: Volatility -->
   <div class="section-title">01 — Volatility &amp; Fear <span class="tag tag-manual">Manual · TradingView</span></div>
   <div class="grid" style="margin-bottom:16px">
     <div class="card">
@@ -212,7 +210,7 @@
     </div>
     <div class="card">
       <div class="card-header"><span class="card-title">VIX Term Structure</span><div class="card-status" id="dot-vixterm"></div></div>
-      <div class="card-label">VIX futures curve — check cboe.com/vix or TradingView</div>
+      <div class="card-label">Shape of VIX futures curve — cboe.com/vix or TradingView</div>
       <div class="seg-group">
         <button class="seg-btn" id="vixterm-contango" onclick="setSeg('vixterm','contango','bull')">Contango ↗</button>
         <button class="seg-btn" id="vixterm-flat" onclick="setSeg('vixterm','flat','neut')">Flat</button>
@@ -222,13 +220,13 @@
     </div>
   </div>
 
-  <!-- 02: Credit — Auto -->
+  <!-- 02: Credit -->
   <div class="section-title">02 — Credit &amp; Funding Stress <span class="tag tag-auto">⚡ Auto-filled · FRED</span></div>
   <div class="grid" style="margin-bottom:16px">
     <div class="card">
       <div class="auto-badge" id="badge-hy">⚡ Auto</div>
       <div class="card-header"><span class="card-title">HY Credit Spread (OAS)</span><div class="card-status" id="dot-hy"></div></div>
-      <div class="card-label">High Yield OAS · FRED series BAMLH0A0HYM2</div>
+      <div class="card-label">High Yield OAS · FRED: BAMLH0A0HYM2</div>
       <div class="input-group">
         <input type="number" class="num-input" id="hy" placeholder="Loading..." step="5" min="100" max="1500" oninput="autoEval()">
         <span class="input-unit">bps</span>
@@ -238,7 +236,7 @@
     <div class="card">
       <div class="auto-badge" id="badge-hydirn">⚡ Auto</div>
       <div class="card-header"><span class="card-title">HY Spread Direction</span><div class="card-status" id="dot-hydirn"></div></div>
-      <div class="card-label">Auto-derived from FRED — today vs previous observation</div>
+      <div class="card-label">Auto-derived — today vs previous FRED observation</div>
       <div class="seg-group">
         <button class="seg-btn" id="hydirn-tightening" onclick="setSeg('hydirn','tightening','bull')">Tightening ↓</button>
         <button class="seg-btn" id="hydirn-stable" onclick="setSeg('hydirn','stable','neut')">Stable</button>
@@ -248,7 +246,7 @@
     </div>
   </div>
 
-  <!-- 03: FX — Manual -->
+  <!-- 03: FX -->
   <div class="section-title">03 — FX Risk Proxies <span class="tag tag-manual">Manual · TradingView</span></div>
   <div class="grid" style="margin-bottom:16px">
     <div class="card">
@@ -263,7 +261,7 @@
     </div>
     <div class="card">
       <div class="card-header"><span class="card-title">AUD/JPY Direction</span><div class="card-status" id="dot-audjpy"></div></div>
-      <div class="card-label">AUD/JPY on TradingView — best single risk-on/off proxy pair</div>
+      <div class="card-label">AUD/JPY on TradingView — best single risk-on/off proxy</div>
       <div class="seg-group">
         <button class="seg-btn" id="audjpy-rising" onclick="setSeg('audjpy','rising','bull')">Rising ↑</button>
         <button class="seg-btn" id="audjpy-stable" onclick="setSeg('audjpy','stable','neut')">Stable</button>
@@ -273,13 +271,13 @@
     </div>
   </div>
 
-  <!-- 04: Rates — Auto -->
+  <!-- 04: Rates -->
   <div class="section-title">04 — Rates &amp; Yield Curve <span class="tag tag-auto">⚡ Auto-filled · FRED</span></div>
   <div class="grid-3" style="margin-bottom:16px">
     <div class="card">
       <div class="auto-badge" id="badge-2y">⚡ Auto</div>
       <div class="card-header"><span class="card-title">US 2Y Yield</span><div class="card-status" id="dot-2y"></div></div>
-      <div class="card-label">Most policy-sensitive tenor · FRED series DGS2</div>
+      <div class="card-label">Policy-sensitive tenor · FRED: DGS2</div>
       <div class="input-group">
         <input type="number" class="num-input" id="yield2y" placeholder="Loading..." step="0.01" min="0" max="15" oninput="autoEval()">
         <span class="input-unit">%</span>
@@ -289,7 +287,7 @@
     <div class="card">
       <div class="auto-badge" id="badge-2ydirn">⚡ Auto</div>
       <div class="card-header"><span class="card-title">2Y Direction</span><div class="card-status" id="dot-2ydirn"></div></div>
-      <div class="card-label">Auto-derived from FRED — today vs previous observation</div>
+      <div class="card-label">Auto-derived — today vs previous FRED observation</div>
       <div class="seg-group">
         <button class="seg-btn" id="y2dirn-falling" onclick="setSeg('y2dirn','falling','bull')">Falling ↓</button>
         <button class="seg-btn" id="y2dirn-stable" onclick="setSeg('y2dirn','stable','neut')">Stable</button>
@@ -300,7 +298,7 @@
     <div class="card">
       <div class="auto-badge" id="badge-curve">⚡ Auto</div>
       <div class="card-header"><span class="card-title">2Y–10Y Curve</span><div class="card-status" id="dot-curve"></div></div>
-      <div class="card-label">Yield curve slope · FRED series T10Y2Y</div>
+      <div class="card-label">Yield curve slope · FRED: T10Y2Y</div>
       <div class="seg-group">
         <button class="seg-btn" id="curve-steep" onclick="setSeg('curve','steep','bull')">Steep +</button>
         <button class="seg-btn" id="curve-flat" onclick="setSeg('curve','flat','neut')">Flat</button>
@@ -310,12 +308,12 @@
     </div>
   </div>
 
-  <!-- 05: Safe Havens — Manual -->
+  <!-- 05: Safe Havens -->
   <div class="section-title">05 — Equities &amp; Safe Havens <span class="tag tag-manual">Manual · TradingView</span></div>
   <div class="grid" style="margin-bottom:16px">
     <div class="card">
       <div class="card-header"><span class="card-title">Stocks vs Bonds Correlation</span><div class="card-status" id="dot-corr"></div></div>
-      <div class="card-label">Are SPY and TLT moving in opposite directions? (normal) or together? (stress)</div>
+      <div class="card-label">Are SPY and TLT moving opposite (normal) or together (stress)?</div>
       <div class="seg-group">
         <button class="seg-btn" id="corr-negative" onclick="setSeg('corr','negative','bull')">Negative (normal)</button>
         <button class="seg-btn" id="corr-positive" onclick="setSeg('corr','positive','bear')">Positive (stress)</button>
@@ -351,248 +349,347 @@
 
 </div>
 <script>
+  // ── CONFIG ────────────────────────────────────────────────────────
   const FRED_KEY = '4eec500e70b838e82c35e91481af1799';
+  const SERIES = { y2: 'DGS2', curve: 'T10Y2Y', hy: 'BAMLH0A0HYM2' };
+
+  // ── STATE ─────────────────────────────────────────────────────────
   const segState = {};
   let fredLoaded = false;
+  let pending = 0;
+  const fredData = {};
 
-  async function fetchSeries(id) {
-    const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${id}&api_key=${FRED_KEY}&sort_order=desc&limit=3&file_type=json`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`${id} HTTP ${r.status}`);
-    const d = await r.json();
-    return d.observations.filter(o => o.value !== '.');
+  // ── JSONP FETCH ───────────────────────────────────────────────────
+  // Uses JSONP (script tag injection) to bypass CORS on GitHub Pages
+  function fetchJSONP(seriesId) {
+    return new Promise((resolve, reject) => {
+      const cbName = '_fred_' + seriesId + '_' + Date.now();
+      const timeout = setTimeout(() => {
+        delete window[cbName];
+        reject(new Error('Timeout: ' + seriesId));
+      }, 12000);
+
+      window[cbName] = function(data) {
+        clearTimeout(timeout);
+        delete window[cbName];
+        document.getElementById('script_' + seriesId) &&
+          document.getElementById('script_' + seriesId).remove();
+        if (data && data.observations) {
+          const obs = data.observations.filter(o => o.value !== '.');
+          resolve(obs);
+        } else {
+          reject(new Error('No data: ' + seriesId));
+        }
+      };
+
+      const url = 'https://api.stlouisfed.org/fred/series/observations' +
+        '?series_id=' + seriesId +
+        '&api_key=' + FRED_KEY +
+        '&sort_order=desc&limit=3&file_type=json&callback=' + cbName;
+
+      const script = document.createElement('script');
+      script.id = 'script_' + seriesId;
+      script.src = url;
+      script.onerror = () => {
+        clearTimeout(timeout);
+        delete window[cbName];
+        reject(new Error('Script error: ' + seriesId));
+      };
+      document.head.appendChild(script);
+    });
   }
 
-  async function fetchFREDData() {
+  // ── FETCH ORCHESTRATION ───────────────────────────────────────────
+  function fetchAll() {
     const btn = document.getElementById('fetchBtn');
     const status = document.getElementById('fetchStatus');
-    btn.disabled = true; btn.textContent = '⏳ Loading...';
-    status.className = 'fetch-status loading'; status.textContent = 'Fetching...';
-    try {
-      const [obs2y, obsCurve, obsHY] = await Promise.all([
-        fetchSeries('DGS2'), fetchSeries('T10Y2Y'), fetchSeries('BAMLH0A0HYM2')
-      ]);
+    btn.disabled = true;
+    btn.textContent = '⏳ Loading...';
+    status.className = 'fetch-status loading';
+    status.textContent = 'Fetching FRED...';
 
-      // 2Y Yield
-      const cur2y = parseFloat(obs2y[0].value), prev2y = parseFloat(obs2y[1].value);
-      const chg2y = cur2y - prev2y;
-      setFredDisplay('fred-2y', cur2y.toFixed(2) + '%', 'fred-2y-chg',
-        (chg2y >= 0 ? '▲ +' : '▼ ') + chg2y.toFixed(3) + '% vs prev',
-        chg2y > 0.005 ? 'up' : chg2y < -0.005 ? 'down' : 'flat');
-      const y2el = document.getElementById('yield2y');
-      y2el.value = cur2y.toFixed(2); y2el.classList.add('autofilled');
+    const jobs = [
+      fetchJSONP(SERIES.y2).then(obs => { fredData.y2 = obs; }),
+      fetchJSONP(SERIES.curve).then(obs => { fredData.curve = obs; }),
+      fetchJSONP(SERIES.hy).then(obs => { fredData.hy = obs; })
+    ];
+
+    Promise.all(jobs)
+      .then(() => {
+        applyFredData();
+        const t = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+        status.className = 'fetch-status success';
+        status.textContent = '✓ Loaded ' + t;
+        btn.textContent = '↺ Refresh';
+        btn.disabled = false;
+        fredLoaded = true;
+        autoEval();
+      })
+      .catch(err => {
+        status.className = 'fetch-status error';
+        status.textContent = '✗ ' + (err.message || 'Failed');
+        btn.textContent = '▼ Retry';
+        btn.disabled = false;
+      });
+  }
+
+  // ── APPLY FRED DATA ───────────────────────────────────────────────
+  function applyFredData() {
+    // 2Y Yield
+    if (fredData.y2 && fredData.y2.length >= 2) {
+      const cur = parseFloat(fredData.y2[0].value);
+      const prev = parseFloat(fredData.y2[1].value);
+      const chg = cur - prev;
+      setDisplay('fred-2y', cur.toFixed(2) + '%');
+      setSubDisplay('fred-2y-chg', (chg >= 0 ? '▲ +' : '▼ ') + chg.toFixed(3) + '%', chg > 0.005 ? 'up' : chg < -0.005 ? 'down' : '');
+      const el = document.getElementById('yield2y');
+      el.value = cur.toFixed(2); el.classList.add('autofilled');
       showBadge('badge-2y');
-      const dir2y = chg2y > 0.015 ? 'rising' : chg2y < -0.015 ? 'falling' : 'stable';
-      setSeg('y2dirn', dir2y, dir2y==='rising'?'bear':dir2y==='falling'?'bull':'neut', true);
+      const dir = chg > 0.015 ? 'rising' : chg < -0.015 ? 'falling' : 'stable';
+      setSeg('y2dirn', dir, dir==='rising'?'bear':dir==='falling'?'bull':'neut', true);
       showBadge('badge-2ydirn');
+      // dot for 2y level
+      const dot2y = document.getElementById('dot-2y');
+      dot2y.className = 'card-status ' + (cur < 3 ? 'bullish' : cur < 5 ? 'neutral' : 'bearish');
+    }
 
-      // Curve
-      const curCurve = parseFloat(obsCurve[0].value), prevCurve = parseFloat(obsCurve[1].value);
-      const chgCurve = curCurve - prevCurve;
-      const inverted = curCurve < -0.05;
-      setFredDisplay('fred-curve', curCurve.toFixed(2) + '%', 'fred-curve-chg',
-        (chgCurve >= 0 ? '▲ steepening' : '▼ flattening') + (inverted ? ' · INVERTED' : ''),
-        inverted ? 'up' : 'down');
-      const curveVal = curCurve < -0.05 ? 'inverted' : curCurve < 0.2 ? 'flat' : 'steep';
-      setSeg('curve', curveVal, curveVal==='steep'?'bull':curveVal==='flat'?'neut':'bear', true);
+    // Yield Curve
+    if (fredData.curve && fredData.curve.length >= 2) {
+      const cur = parseFloat(fredData.curve[0].value);
+      const prev = parseFloat(fredData.curve[1].value);
+      const chg = cur - prev;
+      const inv = cur < -0.05;
+      setDisplay('fred-curve', cur.toFixed(2) + '%');
+      setSubDisplay('fred-curve-chg',
+        (chg >= 0 ? '▲ steepening' : '▼ flattening') + (inv ? ' · INVERTED' : ''),
+        inv ? 'up' : '');
+      const val = cur < -0.05 ? 'inverted' : cur < 0.2 ? 'flat' : 'steep';
+      setSeg('curve', val, val==='steep'?'bull':val==='flat'?'neut':'bear', true);
       showBadge('badge-curve');
       document.getElementById('hint-curve').textContent =
-        `Spread: ${curCurve.toFixed(2)}% — ${inverted ? '⚠ Inverted · recession signal active' : curCurve < 0.2 ? 'Near flat · monitor' : 'Normal slope · no recession signal'}`;
+        'Spread: ' + cur.toFixed(2) + '% — ' +
+        (inv ? '⚠ Inverted · recession signal active' : cur < 0.2 ? 'Near flat · monitor closely' : 'Normal slope · no recession signal');
+    }
 
-      // HY Spread
-      const curHY = parseFloat(obsHY[0].value), prevHY = parseFloat(obsHY[1].value);
-      const chgHY = curHY - prevHY;
-      setFredDisplay('fred-hy', curHY.toFixed(0) + 'bps', 'fred-hy-chg',
-        (chgHY >= 0 ? '▲ +' : '▼ ') + chgHY.toFixed(1) + 'bps vs prev',
-        chgHY > 5 ? 'up' : chgHY < -5 ? 'down' : 'flat');
-      const hyEl = document.getElementById('hy');
-      hyEl.value = curHY.toFixed(0); hyEl.classList.add('autofilled');
+    // HY Spread
+    if (fredData.hy && fredData.hy.length >= 2) {
+      const cur = parseFloat(fredData.hy[0].value);
+      const prev = parseFloat(fredData.hy[1].value);
+      const chg = cur - prev;
+      setDisplay('fred-hy', cur.toFixed(0) + 'bps');
+      setSubDisplay('fred-hy-chg', (chg >= 0 ? '▲ +' : '▼ ') + chg.toFixed(1) + 'bps', chg > 5 ? 'up' : chg < -5 ? 'down' : '');
+      const el = document.getElementById('hy');
+      el.value = cur.toFixed(0); el.classList.add('autofilled');
       showBadge('badge-hy');
-      const dirHY = chgHY > 5 ? 'widening' : chgHY < -5 ? 'tightening' : 'stable';
-      setSeg('hydirn', dirHY, dirHY==='tightening'?'bull':dirHY==='stable'?'neut':'bear', true);
+      const dir = chg > 5 ? 'widening' : chg < -5 ? 'tightening' : 'stable';
+      setSeg('hydirn', dir, dir==='tightening'?'bull':dir==='stable'?'neut':'bear', true);
       showBadge('badge-hydirn');
       document.getElementById('hint-hy').textContent =
-        `${curHY.toFixed(0)}bps — ${curHY<350?'Risk-on territory':curHY<500?'Caution zone':'Risk-off · stress elevated'}`;
-
-      fredLoaded = true;
-      const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-      status.className = 'fetch-status success'; status.textContent = '✓ Loaded ' + t;
-      btn.textContent = '↺ Refresh'; btn.disabled = false;
-      autoEval();
-    } catch(err) {
-      status.className = 'fetch-status error';
-      status.textContent = '✗ ' + (err.message || 'Failed');
-      btn.textContent = '▼ Retry'; btn.disabled = false;
+        cur.toFixed(0) + 'bps — ' + (cur<350?'Risk-on territory':cur<500?'Caution zone':'Risk-off · stress elevated');
     }
   }
 
-  function setFredDisplay(valId, val, chgId, chg, cls) {
-    const v = document.getElementById(valId); v.textContent = val; v.classList.add('loaded');
-    const c = document.getElementById(chgId); c.textContent = chg; c.className = 'fred-field-sub ' + cls;
+  function setDisplay(id, val) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = val; el.classList.add('loaded'); }
   }
-  function showBadge(id) { document.getElementById(id).classList.add('visible'); }
+  function setSubDisplay(id, val, cls) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = val; el.className = 'fred-field-sub' + (cls ? ' ' + cls : ''); }
+  }
+  function showBadge(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('visible');
+  }
 
-  function setSeg(group, value, type, isAuto=false) {
-    segState[group] = {value, type};
-    document.querySelectorAll(`[id^="${group}-"]`).forEach(b => b.className = 'seg-btn');
-    const btn = document.getElementById(`${group}-${value}`);
-    if (btn) btn.classList.add(`active-${type}`);
-    const dot = document.getElementById(`dot-${group}`);
-    if (dot) { dot.className = 'card-status'; dot.classList.add(type==='bull'?'bullish':type==='neut'?'neutral':'bearish'); }
+  // ── SEGMENT BUTTONS ───────────────────────────────────────────────
+  function setSeg(group, value, type, isAuto) {
+    segState[group] = { value, type };
+    document.querySelectorAll('[id^="' + group + '-"]').forEach(b => b.className = 'seg-btn');
+    const btn = document.getElementById(group + '-' + value);
+    if (btn) btn.classList.add('active-' + type);
+    const dot = document.getElementById('dot-' + group);
+    if (dot) {
+      dot.className = 'card-status';
+      dot.classList.add(type==='bull'?'bullish':type==='neut'?'neutral':'bearish');
+    }
     autoEval();
   }
 
+  // ── AUTO EVAL (dots update without full evaluate) ─────────────────
   function autoEval() {
     const vix = parseFloat(document.getElementById('vix').value);
     const hy = parseFloat(document.getElementById('hy').value);
     if (!isNaN(vix)) {
-      const dot = document.getElementById('dot-vix'); dot.className = 'card-status';
+      const dot = document.getElementById('dot-vix');
       const hint = document.getElementById('hint-vix');
-      if (vix < 15) { dot.classList.add('bullish'); hint.textContent = `${vix} — Calm. Risk-on conditions.`; }
-      else if (vix < 25) { dot.classList.add('neutral'); hint.textContent = `${vix} — Normal. Monitor for changes.`; }
-      else if (vix < 35) { dot.classList.add('bearish'); hint.textContent = `${vix} — Elevated stress. Reduce exposure.`; }
-      else { dot.classList.add('bearish'); hint.textContent = `${vix} — PANIC. Crisis mode. Cash is king.`; }
+      dot.className = 'card-status';
+      if (vix < 15) { dot.classList.add('bullish'); hint.textContent = vix + ' — Calm. Risk-on conditions.'; }
+      else if (vix < 25) { dot.classList.add('neutral'); hint.textContent = vix + ' — Normal. Monitor for changes.'; }
+      else if (vix < 35) { dot.classList.add('bearish'); hint.textContent = vix + ' — Elevated stress. Reduce exposure.'; }
+      else { dot.classList.add('bearish'); hint.textContent = vix + ' — PANIC. Crisis mode.'; }
     }
     if (!isNaN(hy)) {
-      const dot = document.getElementById('dot-hy'); dot.className = 'card-status';
+      const dot = document.getElementById('dot-hy');
+      dot.className = 'card-status';
       dot.classList.add(hy<350?'bullish':hy<500?'neutral':'bearish');
     }
   }
 
+  // ── EVALUATE ─────────────────────────────────────────────────────
   function evaluate() {
     const vix = parseFloat(document.getElementById('vix').value);
     const hy = parseFloat(document.getElementById('hy').value);
     let score = 0, total = 0, checks = [];
 
-    const add = (cond1, cond2, type, icon, text, signal) => {
+    function chk(condition, halfCond, type, halfType, icon, halfIcon, text, halfText, signal, halfSignal) {
       total++;
-      if (cond1) score += 1;
-      else if (cond2) score += 0.5;
-      checks.push({type, icon, text, signal});
-    };
+      if (condition) { score += 1; checks.push({type, icon, text, signal}); }
+      else if (halfCond) { score += 0.5; checks.push({type:halfType, icon:halfIcon, text:halfText, signal:halfSignal}); }
+      else { checks.push({type:'bear', icon:'✗', text:text.replace(/^.*—\s/,'Bearish: '), signal}); }
+    }
 
     if (!isNaN(vix)) {
       total++;
-      if (vix<15){score+=1;checks.push({type:'bull',icon:'✓',text:`VIX ${vix} — Calm. Sub-15 = risk-on.`,signal:'RISK-ON'});}
-      else if(vix<25){score+=0.5;checks.push({type:'neut',icon:'~',text:`VIX ${vix} — Normal. No extreme signal.`,signal:'NEUTRAL'});}
-      else if(vix<35){checks.push({type:'bear',icon:'✗',text:`VIX ${vix} — Elevated stress. Reduce gross exposure.`,signal:'CAUTION'});}
-      else{checks.push({type:'bear',icon:'✗',text:`VIX ${vix} — PANIC. Cash is king.`,signal:'RISK-OFF'});}
+      if (vix<15) { score+=1; checks.push({type:'bull',icon:'✓',text:'VIX '+vix+' — Calm. Sub-15 = risk-on environment.',signal:'RISK-ON'}); }
+      else if (vix<25) { score+=0.5; checks.push({type:'neut',icon:'~',text:'VIX '+vix+' — Normal range. No extreme signal.',signal:'NEUTRAL'}); }
+      else if (vix<35) { checks.push({type:'bear',icon:'✗',text:'VIX '+vix+' — Elevated stress. Reduce gross exposure.',signal:'CAUTION'}); }
+      else { checks.push({type:'bear',icon:'✗',text:'VIX '+vix+' — PANIC level. Cash is king.',signal:'RISK-OFF'}); }
     }
-    if(segState.vixterm){total++;const v=segState.vixterm;
-      if(v.value==='contango'){score+=1;checks.push({type:'bull',icon:'✓',text:'VIX in contango — calm, no hedging panic.',signal:'RISK-ON'});}
+    if (segState.vixterm) { total++; const v=segState.vixterm;
+      if (v.value==='contango'){score+=1;checks.push({type:'bull',icon:'✓',text:'VIX in contango — calm, no hedging panic.',signal:'RISK-ON'});}
       else if(v.value==='flat'){score+=0.5;checks.push({type:'neut',icon:'~',text:'VIX term structure flat — transitioning.',signal:'NEUTRAL'});}
-      else{checks.push({type:'bear',icon:'✗',text:'VIX in backwardation — fear elevated, hedging demand spiking.',signal:'RISK-OFF'});}}
-    if(!isNaN(hy)){total++;
-      if(hy<350){score+=1;checks.push({type:'bull',icon:'✓',text:`HY ${hy}bps — Credit relaxed. Risk appetite healthy.`,signal:'RISK-ON'});}
-      else if(hy<500){score+=0.5;checks.push({type:'neut',icon:'~',text:`HY ${hy}bps — Caution zone. Monitor for widening.`,signal:'CAUTION'});}
-      else{checks.push({type:'bear',icon:'✗',text:`HY ${hy}bps — Risk-off. Credit stress elevated.`,signal:'RISK-OFF'});}}
-    if(segState.hydirn){total++;const v=segState.hydirn;
+      else{checks.push({type:'bear',icon:'✗',text:'VIX in backwardation — fear elevated, hedging demand spiking.',signal:'RISK-OFF'});} }
+    if (!isNaN(hy)) { total++;
+      if(hy<350){score+=1;checks.push({type:'bull',icon:'✓',text:'HY '+hy+'bps — Credit relaxed. Risk appetite healthy.',signal:'RISK-ON'});}
+      else if(hy<500){score+=0.5;checks.push({type:'neut',icon:'~',text:'HY '+hy+'bps — Caution zone. Monitor for widening.',signal:'CAUTION'});}
+      else{checks.push({type:'bear',icon:'✗',text:'HY '+hy+'bps — Risk-off. Credit stress elevated.',signal:'RISK-OFF'});} }
+    if (segState.hydirn) { total++; const v=segState.hydirn;
       if(v.value==='tightening'){score+=1;checks.push({type:'bull',icon:'✓',text:'Spreads tightening — risk appetite expanding.',signal:'RISK-ON'});}
       else if(v.value==='stable'){score+=0.5;checks.push({type:'neut',icon:'~',text:'Spreads stable — no strong directional signal.',signal:'NEUTRAL'});}
-      else{checks.push({type:'bear',icon:'✗',text:'Spreads widening — early warning. Watch for >20bps/day.',signal:'CAUTION'});}}
-    if(segState.jpy){total++;const v=segState.jpy;
+      else{checks.push({type:'bear',icon:'✗',text:'Spreads widening — early warning. Watch for >20bps/day.',signal:'CAUTION'});} }
+    if (segState.jpy) { total++; const v=segState.jpy;
       if(v.value==='weakening'){score+=1;checks.push({type:'bull',icon:'✓',text:'JPY weakening — carry intact. Risk appetite supportive.',signal:'RISK-ON'});}
       else if(v.value==='stable'){score+=0.5;checks.push({type:'neut',icon:'~',text:'JPY stable — no carry unwind signal.',signal:'NEUTRAL'});}
-      else{checks.push({type:'bear',icon:'✗',text:'JPY strengthening — carry unwind. Risk-off flows active.',signal:'RISK-OFF'});}}
-    if(segState.audjpy){total++;const v=segState.audjpy;
+      else{checks.push({type:'bear',icon:'✗',text:'JPY strengthening — carry unwind in progress. Risk-off flows.',signal:'RISK-OFF'});} }
+    if (segState.audjpy) { total++; const v=segState.audjpy;
       if(v.value==='rising'){score+=1;checks.push({type:'bull',icon:'✓',text:'AUD/JPY rising — risk-on proxy confirming appetite.',signal:'RISK-ON'});}
       else if(v.value==='stable'){score+=0.5;checks.push({type:'neut',icon:'~',text:'AUD/JPY stable — no strong regime signal.',signal:'NEUTRAL'});}
-      else{checks.push({type:'bear',icon:'✗',text:'AUD/JPY falling — risk-off / carry unwind signal.',signal:'RISK-OFF'});}}
-    if(segState.y2dirn){total++;const v=segState.y2dirn;
+      else{checks.push({type:'bear',icon:'✗',text:'AUD/JPY falling — risk-off / carry unwind signal.',signal:'RISK-OFF'});} }
+    if (segState.y2dirn) { total++; const v=segState.y2dirn;
       if(v.value==='falling'){score+=1;checks.push({type:'bull',icon:'✓',text:'2Y yield falling — easier conditions being priced in.',signal:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({type:'neut',icon:'~',text:'2Y stable — no strong rate direction signal.',signal:'NEUTRAL'});}
-      else{checks.push({type:'bear',icon:'✗',text:'2Y rising — tighter conditions ahead. Headwind for risk.',signal:'CAUTION'});}}
-    if(segState.curve){total++;const v=segState.curve;
-      if(v.value==='steep'){score+=1;checks.push({type:'bull',icon:'✓',text:'Curve steep — healthy growth expectations.',signal:'RISK-ON'});}
-      else if(v.value==='flat'){score+=0.5;checks.push({type:'neut',icon:'~',text:'Curve flat — slowing growth environment.',signal:'NEUTRAL'});}
-      else{checks.push({type:'bear',icon:'✗',text:'Curve inverted — recession signal. 6-18m lead time.',signal:'WARNING'});}}
-    if(segState.corr){total++;const v=segState.corr;
-      if(v.value==='negative'){score+=1;checks.push({type:'bull',icon:'✓',text:'Stocks/bonds negative correlation — normal regime.',signal:'NORMAL'});}
-      else{checks.push({type:'bear',icon:'✗',text:'Stocks/bonds positive correlation — relationships broken.',signal:'STRESS'});}}
-    if(segState.gold){total++;const v=segState.gold;
-      if(v.value==='falling'){score+=1;checks.push({type:'bull',icon:'✓',text:'Gold falling — real rates supportive, no flight-to-quality.',signal:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({type:'neut',icon:'~',text:'2Y yield stable — no strong rate direction signal.',signal:'NEUTRAL'});}
+      else{checks.push({type:'bear',icon:'✗',text:'2Y yield rising — tighter conditions ahead. Headwind for risk.',signal:'CAUTION'});} }
+    if (segState.curve) { total++; const v=segState.curve;
+      if(v.value==='steep'){score+=1;checks.push({type:'bull',icon:'✓',text:'Curve steep — healthy growth expectations. No recession signal.',signal:'RISK-ON'});}
+      else if(v.value==='flat'){score+=0.5;checks.push({type:'neut',icon:'~',text:'Curve flat — slowing growth environment. Watch for inversion.',signal:'NEUTRAL'});}
+      else{checks.push({type:'bear',icon:'✗',text:'Curve inverted — historical recession signal. 6-18m lead time.',signal:'WARNING'});} }
+    if (segState.corr) { total++; const v=segState.corr;
+      if(v.value==='negative'){score+=1;checks.push({type:'bull',icon:'✓',text:'Stocks/bonds negative correlation — normal regime, diversification working.',signal:'NORMAL'});}
+      else{checks.push({type:'bear',icon:'✗',text:'Stocks/bonds positive correlation — relationships broken. Stress signal.',signal:'STRESS'});} }
+    if (segState.gold) { total++; const v=segState.gold;
+      if(v.value==='falling'){score+=1;checks.push({type:'bull',icon:'✓',text:'Gold falling — no flight-to-quality. Real rates supportive.',signal:'RISK-ON'});}
       else if(v.value==='stable'){score+=0.5;checks.push({type:'neut',icon:'~',text:'Gold stable — no strong safe-haven signal.',signal:'NEUTRAL'});}
-      else{checks.push({type:'bear',icon:'✗',text:'Gold rising — potential flight-to-quality. Watch USTs.',signal:'CAUTION'});}}
+      else{checks.push({type:'bear',icon:'✗',text:'Gold rising — potential flight-to-quality forming. Watch USTs too.',signal:'CAUTION'});} }
 
-    if(total===0){alert('Please enter at least one reading.');return;}
+    if (total === 0) { alert('Please enter at least one reading before evaluating.'); return; }
 
-    const pct = score/total;
+    const pct = score / total;
     let regime, cls, note;
-    if(pct>=0.65){regime='RISK-ON';cls='risk-on';note='Indicators broadly supportive. Risk appetite healthy. Standard position sizing appropriate.';}
-    else if(pct>=0.35){regime='NEUTRAL / MIXED';cls='neutral';note='Mixed signals. Reduce size on speculative positions. Wait for clearer alignment.';}
-    else{regime='RISK-OFF';cls='risk-off';note='3+ indicators warning. Reduce gross exposure. Let the regime clarify before deploying capital.';}
+    if (pct>=0.65){regime='RISK-ON';cls='risk-on';note='Indicators broadly supportive. Risk appetite healthy. Standard position sizing appropriate.';}
+    else if(pct>=0.35){regime='NEUTRAL / MIXED';cls='neutral';note='Mixed signals. Reduce size on speculative positions. Wait for clearer cross-asset alignment.';}
+    else{regime='RISK-OFF';cls='risk-off';note='3+ indicators warning. Consider reducing gross exposure. Let the regime clarify before deploying capital.';}
 
-    const sc = Math.round(pct*100);
-    document.getElementById('regimeBanner').className = `regime-banner ${cls}`;
+    const sc = Math.round(pct * 100);
+    document.getElementById('regimeBanner').className = 'regime-banner ' + cls;
     document.getElementById('regimeValue').textContent = regime;
     document.getElementById('regimeNote').textContent = note;
     const circle = document.getElementById('scoreCircle');
     circle.textContent = sc;
     circle.style.color = pct>=0.65?'var(--green)':pct>=0.35?'var(--amber)':'var(--red)';
 
-    const cl = document.getElementById('checklist'); cl.innerHTML='';
-    checks.forEach((c,i)=>{
-      const d=document.createElement('div');
-      d.className=`check-item ${c.type}`; d.style.animationDelay=`${i*0.05}s`;
-      d.innerHTML=`<span class="check-icon">${c.icon}</span><span class="check-text">${c.text}</span><span class="check-signal">${c.signal}</span>`;
+    const cl = document.getElementById('checklist'); cl.innerHTML = '';
+    checks.forEach((c, i) => {
+      const d = document.createElement('div');
+      d.className = 'check-item ' + c.type;
+      d.style.animationDelay = (i * 0.05) + 's';
+      d.innerHTML = '<span class="check-icon">' + c.icon + '</span><span class="check-text">' + c.text + '</span><span class="check-signal">' + c.signal + '</span>';
       cl.appendChild(d);
     });
-    document.getElementById('resultSection').style.display='block';
+    document.getElementById('resultSection').style.display = 'block';
     addLog(regime, cls, sc, total);
   }
 
-  const log=[];
-  function addLog(regime,cls,score,indicators){
-    const now=new Date();
-    const t=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    log.unshift({t,regime,cls,score,indicators,src:fredLoaded?'⚡ FRED+Manual':'Manual'});
-    renderLog(); document.getElementById('logSection').style.display='block';
+  // ── LOG ───────────────────────────────────────────────────────────
+  const log = [];
+  function addLog(regime, cls, score, indicators) {
+    const now = new Date();
+    const t = now.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' ' +
+              now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    log.unshift({t, regime, cls, score, indicators, src: fredLoaded ? '⚡ FRED+Manual' : 'Manual'});
+    renderLog();
+    document.getElementById('logSection').style.display = 'block';
   }
-  function renderLog(){
-    const c=document.getElementById('logEntries'); c.innerHTML='';
-    log.slice(0,8).forEach(e=>{
-      const d=document.createElement('div'); d.className='log-entry';
-      d.innerHTML=`<span class="log-time">${e.t}</span><span class="log-regime ${e.cls}">${e.regime}</span><span class="log-detail">Score ${e.score}/100 · ${e.indicators} indicators · ${e.src}</span>`;
+  function renderLog() {
+    const c = document.getElementById('logEntries'); c.innerHTML = '';
+    log.slice(0, 8).forEach(e => {
+      const d = document.createElement('div'); d.className = 'log-entry';
+      d.innerHTML = '<span class="log-time">' + e.t + '</span>' +
+                    '<span class="log-regime ' + e.cls + '">' + e.regime + '</span>' +
+                    '<span class="log-detail">Score ' + e.score + '/100 · ' + e.indicators + ' indicators · ' + e.src + '</span>';
       c.appendChild(d);
     });
   }
-  function clearLog(){log.length=0;document.getElementById('logSection').style.display='none';}
+  function clearLog() { log.length = 0; document.getElementById('logSection').style.display = 'none'; }
 
-  function resetAll(){
-    ['vix','hy','yield2y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('autofilled');}});
-    ['vixterm','hydirn','jpy','audjpy','y2dirn','curve','corr','gold'].forEach(g=>{
+  // ── RESET ─────────────────────────────────────────────────────────
+  function resetAll() {
+    ['vix','hy','yield2y'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = ''; el.classList.remove('autofilled'); }
+    });
+    ['vixterm','hydirn','jpy','audjpy','y2dirn','curve','corr','gold'].forEach(g => {
       delete segState[g];
-      document.querySelectorAll(`[id^="${g}-"]`).forEach(b=>b.className='seg-btn');
-      const dot=document.getElementById(`dot-${g}`);if(dot)dot.className='card-status';
+      document.querySelectorAll('[id^="' + g + '-"]').forEach(b => b.className = 'seg-btn');
+      const dot = document.getElementById('dot-' + g); if (dot) dot.className = 'card-status';
     });
-    ['dot-vix','dot-hy'].forEach(id=>{const d=document.getElementById(id);if(d)d.className='card-status';});
-    ['badge-hy','badge-hydirn','badge-2y','badge-2ydirn','badge-curve'].forEach(id=>{
-      const b=document.getElementById(id);if(b)b.classList.remove('visible');
+    ['dot-vix','dot-hy','dot-2y'].forEach(id => {
+      const d = document.getElementById(id); if (d) d.className = 'card-status';
     });
-    ['fred-2y','fred-curve','fred-hy'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent='—';el.classList.remove('loaded');}});
-    ['fred-2y-chg','fred-curve-chg','fred-hy-chg'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='';});
-    document.getElementById('hint-vix').textContent='— / Sub-15 calm · 15-25 normal · 25-35 elevated · 35+ panic';
-    document.getElementById('hint-hy').textContent='— / Below 350 risk-on · 350-500 caution · Above 500 risk-off';
-    document.getElementById('hint-curve').textContent='Inversion = recession signal 6-18m ahead';
-    document.getElementById('regimeBanner').className='regime-banner pending';
-    document.getElementById('regimeValue').textContent='AWAITING INPUT';
-    document.getElementById('regimeNote').textContent='Click Load FRED Data above, then enter VIX and FX from TradingView. Press Evaluate to assess the regime.';
-    document.getElementById('scoreCircle').textContent='—';
-    document.getElementById('scoreCircle').style.color='';
-    document.getElementById('resultSection').style.display='none';
-    document.getElementById('fetchStatus').textContent='Not loaded';
-    document.getElementById('fetchStatus').className='fetch-status';
-    document.getElementById('fetchBtn').textContent='▼ Load FRED Data';
-    document.getElementById('fetchBtn').disabled=false;
-    fredLoaded=false;
+    ['badge-hy','badge-hydirn','badge-2y','badge-2ydirn','badge-curve'].forEach(id => {
+      const b = document.getElementById(id); if (b) b.classList.remove('visible');
+    });
+    ['fred-2y','fred-curve','fred-hy'].forEach(id => {
+      const el = document.getElementById(id); if (el) { el.textContent = '—'; el.classList.remove('loaded'); }
+    });
+    ['fred-2y-chg','fred-curve-chg','fred-hy-chg'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '';
+    });
+    document.getElementById('hint-vix').textContent = '— / Sub-15 calm · 15-25 normal · 25-35 elevated · 35+ panic';
+    document.getElementById('hint-hy').textContent = '— / Below 350 risk-on · 350-500 caution · Above 500 risk-off';
+    document.getElementById('hint-curve').textContent = 'Inversion = recession signal 6-18m ahead';
+    document.getElementById('regimeBanner').className = 'regime-banner pending';
+    document.getElementById('regimeValue').textContent = 'AWAITING INPUT';
+    document.getElementById('regimeNote').textContent = 'Click Load FRED Data, then enter VIX and FX from TradingView. Press Evaluate.';
+    document.getElementById('scoreCircle').textContent = '—';
+    document.getElementById('scoreCircle').style.color = '';
+    document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('fetchStatus').textContent = 'Not loaded';
+    document.getElementById('fetchStatus').className = 'fetch-status';
+    document.getElementById('fetchBtn').textContent = '▼ Load FRED Data';
+    document.getElementById('fetchBtn').disabled = false;
+    fredLoaded = false;
+    Object.keys(fredData).forEach(k => delete fredData[k]);
   }
 
-  function updateClock(){
-    const now=new Date();
-    document.getElementById('dateDisplay').textContent=now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
-    document.getElementById('timeDisplay').textContent=now.toLocaleTimeString('en-GB')+' GMT';
+  // ── CLOCK ─────────────────────────────────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+    document.getElementById('timeDisplay').textContent = now.toLocaleTimeString('en-GB') + ' GMT';
   }
-  updateClock(); setInterval(updateClock,1000);
+  updateClock();
+  setInterval(updateClock, 1000);
 </script>
 </body>
 </html>
