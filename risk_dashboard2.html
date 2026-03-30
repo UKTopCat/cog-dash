@@ -170,6 +170,41 @@
   .reset-btn { background: none; border: 1px solid var(--border2); color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 14px; border-radius: 3px; cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.08em; }
   .reset-btn:hover { color: var(--text); border-color: var(--text); }
 
+  @keyframes pulseBorder {
+    0%   { box-shadow: 0 0 0 0 rgba(232,160,32,0); }
+    30%  { box-shadow: 0 0 0 6px rgba(232,160,32,0.35); }
+    60%  { box-shadow: 0 0 0 3px rgba(232,160,32,0.15); }
+    100% { box-shadow: 0 0 0 0 rgba(232,160,32,0); }
+  }
+  @keyframes pulseBorderGreen {
+    0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+    30%  { box-shadow: 0 0 0 8px rgba(46,204,113,0.4); }
+    60%  { box-shadow: 0 0 0 4px rgba(46,204,113,0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+  }
+  @keyframes pulseBorderAmber {
+    0%   { box-shadow: 0 0 0 0 rgba(243,156,18,0); }
+    30%  { box-shadow: 0 0 0 8px rgba(243,156,18,0.4); }
+    60%  { box-shadow: 0 0 0 4px rgba(243,156,18,0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(243,156,18,0); }
+  }
+  @keyframes pulseBorderRed {
+    0%   { box-shadow: 0 0 0 0 rgba(231,76,60,0); }
+    30%  { box-shadow: 0 0 0 8px rgba(231,76,60,0.4); }
+    60%  { box-shadow: 0 0 0 4px rgba(231,76,60,0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(231,76,60,0); }
+  }
+  @keyframes pulseBorderBlue {
+    0%   { box-shadow: 0 0 0 0 rgba(52,152,219,0); }
+    30%  { box-shadow: 0 0 0 8px rgba(52,152,219,0.4); }
+    60%  { box-shadow: 0 0 0 4px rgba(52,152,219,0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(52,152,219,0); }
+  }
+  .pulse-green  { animation: pulseBorderGreen 1s ease-out 3; }
+  .pulse-amber  { animation: pulseBorderAmber 1s ease-out 3; }
+  .pulse-red    { animation: pulseBorderRed   1s ease-out 3; }
+  .pulse-blue   { animation: pulseBorderBlue  1s ease-out 3; }
+
   @media (max-width: 700px) {
     .grid, .grid-3, .banner-row { grid-template-columns: 1fr; }
     .quadrant-layout { grid-template-columns: 1fr; }
@@ -291,7 +326,7 @@
   </div>
 
   <!-- Dual Regime Banner -->
-  <div class="banner-row">
+  <div class="banner-row" id="bannerRow">
     <div class="regime-banner pending" id="riskBanner">
       <div>
         <div class="regime-label">Risk Regime</div>
@@ -834,6 +869,25 @@
     const circle=document.getElementById('scoreCircle');
     circle.textContent=sc;
     circle.style.color=pct>=0.65?'var(--green)':pct>=0.35?'var(--amber)':'var(--red)';
+
+    // Scroll to banner row and pulse
+    const bannerRow = document.getElementById('bannerRow');
+    if (bannerRow) {
+      setTimeout(() => {
+        bannerRow.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+      // Pick pulse colour based on risk regime
+      const pulseClass = pct>=0.65 ? 'pulse-green' : pct>=0.35 ? 'pulse-amber' : 'pulse-red';
+      // Pick quadrant pulse colour
+      const qPulse = quadrantState==='deflation' ? 'pulse-blue' : quadrantState==='goldilocks' ? 'pulse-green' : quadrantState==='reflation' ? 'pulse-amber' : quadrantState ? 'pulse-red' : pulseClass;
+      [document.getElementById('riskBanner'), document.getElementById('quadrantBanner')].forEach((el, i) => {
+        if (!el) return;
+        el.classList.remove('pulse-green','pulse-amber','pulse-red','pulse-blue');
+        void el.offsetWidth; // force reflow so animation restarts
+        el.classList.add(i===0 ? pulseClass : qPulse);
+        el.addEventListener('animationend', () => el.classList.remove('pulse-green','pulse-amber','pulse-red','pulse-blue'), { once: true });
+      });
+    }
 
     const cl=document.getElementById('checklist');cl.innerHTML='';
     checks.forEach((c,i)=>{
