@@ -23,7 +23,7 @@ jobs:
         env:
           FRED_KEY: ${{ secrets.FRED_API_KEY }}
         run: |
-          sed -i "s/%%FRED_API_KEY%%/${FRED_KEY}/g" risk_dashboard.html
+          sed -i "s/%%FRED_API_KEY%%/${FRED_KEY}/g" risk_dashboard2.html
           echo "Injection complete. Checking result:"
           grep -o "FRED_KEY = '.\{6\}" risk_dashboard.html
 
