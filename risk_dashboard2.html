@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Regime Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f; --surface: #111318; --surface2: #181c22;
+    --border: #232830; --border2: #2d3440; --text: #c8d0dc;
+    --muted: #8a94a8; --accent: #e8a020; --green: #2ecc71;
+    --red: #e74c3c; --amber: #f39c12; --blue: #3498db;
+    --risk-on: #1a3a2a; --risk-on-border: #2ecc71;
+    --neutral: #2a2a1a; --neutral-border: #f39c12;
+    --risk-off: #3a1a1a; --risk-off-border: #e74c3c;
+    --goldilocks: #1a3a2a; --goldilocks-border: #2ecc71;
+    --reflation: #2a2a1a; --reflation-border: #f39c12;
+    --stagflation: #3a1a1a; --stagflation-border: #e74c3c;
+    --deflation: #0f1f30; --deflation-border: #3498db;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; min-height: 100vh; padding: 24px; }
+  body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px); pointer-events: none; z-index: 0; }
+  .container { max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* Header */
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .header-left h1 { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+  .header-left p { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
+  .date-display { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); text-align: right; }
+  .date-display span { display: block; color: var(--text); font-size: 13px; margin-bottom: 2px; }
+  .header-actions { display: flex; align-items: center; gap: 12px; }
+
+  /* FRED bar */
+  .fred-bar { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .fred-bar-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); flex: 1; min-width: 160px; }
+  .fred-bar-label strong { display: block; color: var(--accent); font-size: 13px; margin-bottom: 3px; }
+  .fred-fields { display: flex; gap: 20px; flex-wrap: wrap; flex: 3; }
+  .fred-field { display: flex; flex-direction: column; gap: 2px; min-width: 75px; }
+  .fred-field-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .fred-field-value { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; color: var(--muted); transition: color 0.3s; }
+  .fred-field-value.loaded { color: var(--text); }
+  .fred-field-sub { font-size: 10px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); }
+  .fred-field-sub.up { color: var(--red); }
+  .fred-field-sub.down { color: var(--green); }
+  .fetch-btn { padding: 10px 20px; background: var(--accent); color: #0a0c0f; border: none; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .fetch-btn:hover { background: #f5b030; }
+  .fetch-btn:disabled { background: var(--border2); color: var(--muted); cursor: not-allowed; }
+  .fetch-status { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); text-align: right; min-width: 130px; }
+  .fetch-status.loading { color: var(--amber); }
+  .fetch-status.success { color: var(--green); }
+  .fetch-status.error { color: var(--red); }
+
+  /* Macro Regime Quadrant */
+  .quadrant-section { background: var(--surface); border: 1px solid var(--border2); border-radius: 4px; padding: 16px; margin-bottom: 20px; }
+  .quadrant-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .quadrant-title::before { content: ''; width: 3px; height: 12px; background: var(--accent); border-radius: 2px; flex-shrink: 0; }
+  .quadrant-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; align-items: start; }
+  .quadrant-controls { display: flex; flex-direction: column; gap: 12px; }
+  .quadrant-control-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .quadrant-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; height: 140px; }
+  .quadrant-cell { border: 1px solid var(--border2); border-radius: 3px; padding: 8px 10px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: center; background: var(--surface2); }
+  .quadrant-cell:hover { border-color: var(--border); }
+  .quadrant-cell.active-goldilocks { background: var(--goldilocks); border-color: var(--goldilocks-border); }
+  .quadrant-cell.active-reflation { background: var(--reflation); border-color: var(--reflation-border); }
+  .quadrant-cell.active-stagflation { background: var(--stagflation); border-color: var(--stagflation-border); }
+  .quadrant-cell.active-deflation { background: var(--deflation); border-color: var(--deflation-border); }
+  .quadrant-cell-name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); }
+  .quadrant-cell.active-goldilocks .quadrant-cell-name { color: var(--green); }
+  .quadrant-cell.active-reflation .quadrant-cell-name { color: var(--amber); }
+  .quadrant-cell.active-stagflation .quadrant-cell-name { color: var(--red); }
+  .quadrant-cell.active-deflation .quadrant-cell-name { color: var(--blue); }
+  .quadrant-cell-axes { font-size: 10px; color: var(--muted); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+  .quadrant-axis-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); text-align: center; letter-spacing: 0.08em; text-transform: uppercase; }
+  .quadrant-result { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 12px; min-height: 100px; }
+  .quadrant-result-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px; }
+  .quadrant-result-name { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--muted); }
+  .quadrant-result-implications { font-size: 11px; color: var(--muted); line-height: 1.6; font-family: 'IBM Plex Mono', monospace; }
+
+  /* Dual banner */
+  .banner-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .regime-banner { padding: 18px 20px; border-radius: 4px; border: 1px solid; display: flex; align-items: center; justify-content: space-between; transition: all 0.4s ease; }
+  .regime-banner.risk-on { background: var(--risk-on); border-color: var(--risk-on-border); }
+  .regime-banner.neutral { background: var(--neutral); border-color: var(--neutral-border); }
+  .regime-banner.risk-off { background: var(--risk-off); border-color: var(--risk-off-border); }
+  .regime-banner.pending { background: var(--surface); border-color: var(--border2); }
+  .regime-banner.goldilocks { background: var(--goldilocks); border-color: var(--goldilocks-border); }
+  .regime-banner.reflation { background: var(--reflation); border-color: var(--reflation-border); }
+  .regime-banner.stagflation { background: var(--stagflation); border-color: var(--stagflation-border); }
+  .regime-banner.deflation { background: var(--deflation); border-color: var(--deflation-border); }
+  .regime-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 5px; }
+  .regime-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; letter-spacing: 0.05em; }
+  .regime-banner.risk-on .regime-value { color: var(--green); }
+  .regime-banner.neutral .regime-value { color: var(--amber); }
+  .regime-banner.risk-off .regime-value { color: var(--red); }
+  .regime-banner.pending .regime-value { color: var(--muted); }
+  .regime-banner.goldilocks .regime-value { color: var(--green); }
+  .regime-banner.reflation .regime-value { color: var(--amber); }
+  .regime-banner.stagflation .regime-value { color: var(--red); }
+  .regime-banner.deflation .regime-value { color: var(--blue); }
+  .regime-note { font-size: 11px; color: var(--muted); line-height: 1.5; text-align: right; max-width: 160px; }
+  .score-ring { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 60px; }
+  .score-circle { width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; transition: all 0.4s; }
+  .score-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* Grid */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  /* Card */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; transition: border-color 0.3s; }
+  .card:hover { border-color: var(--border2); }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+  .card-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); flex: 1; }
+  .card-status { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); transition: background 0.3s; flex-shrink: 0; }
+  .card-status.bullish { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .card-status.neutral { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .card-status.bearish { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .card-label { font-size: 12px; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+  .auto-badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; background: rgba(232,160,32,0.12); color: var(--accent); border: 1px solid rgba(232,160,32,0.3); border-radius: 2px; padding: 2px 6px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0; transition: opacity 0.4s; white-space: nowrap; }
+  .auto-badge.visible { opacity: 1; }
+
+  /* Inputs */
+  .num-input { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 15px; padding: 8px 10px; border-radius: 3px; width: 100px; transition: border-color 0.2s; outline: none; }
+  .num-input:focus { border-color: var(--accent); }
+  .num-input::placeholder { color: var(--muted); font-size: 13px; }
+  .num-input.autofilled { border-color: rgba(232,160,32,0.5); background: rgba(232,160,32,0.05); }
+  .input-group { display: flex; gap: 8px; align-items: center; }
+  .input-unit { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+  .seg-group { display: flex; border: 1px solid var(--border2); border-radius: 3px; overflow: hidden; width: 100%; }
+  .seg-btn { flex: 1; padding: 8px 4px; background: var(--surface2); border: none; color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.15s; border-right: 1px solid var(--border2); letter-spacing: 0.03em; text-transform: uppercase; }
+  .seg-btn:last-child { border-right: none; }
+  .seg-btn:hover { background: var(--border); color: var(--text); }
+  .seg-btn.active-bull { background: rgba(46,204,113,0.15); color: var(--green); }
+  .seg-btn.active-neut { background: rgba(243,156,18,0.15); color: var(--amber); }
+  .seg-btn.active-bear { background: rgba(231,76,60,0.15); color: var(--red); }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: 'IBM Plex Mono', monospace; line-height: 1.4; }
+
+  /* Section titles */
+  .section-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .section-title::before { content: ''; width: 3px; height: 12px; background: var(--accent); border-radius: 2px; flex-shrink: 0; }
+  .tag { font-size: 9px; padding: 2px 6px; border-radius: 2px; letter-spacing: 0.06em; }
+  .tag-manual { background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); }
+  .tag-auto { background: rgba(232,160,32,0.1); border: 1px solid rgba(232,160,32,0.3); color: var(--accent); }
+
+  .eval-btn { width: 100%; padding: 14px; background: var(--accent); color: #0a0c0f; border: none; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+  .eval-btn:hover { background: #f5b030; transform: translateY(-1px); }
+
+  .checklist { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .check-item { display: flex; align-items: center; gap: 10px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; padding: 8px 12px; background: var(--surface2); border-radius: 3px; border-left: 3px solid var(--border2); animation: fadeIn 0.3s ease both; }
+  .check-item.bull { border-left-color: var(--green); }
+  .check-item.neut { border-left-color: var(--amber); }
+  .check-item.bear { border-left-color: var(--red); }
+  .check-icon { font-size: 13px; min-width: 16px; }
+  .check-text { color: var(--text); flex: 1; }
+  .check-signal { font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+  .log-section { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-top: 16px; }
+  .log-entry { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; color: var(--muted); animation: fadeIn 0.3s ease; }
+  .log-entry:last-child { border-bottom: none; }
+  .log-time { min-width: 90px; }
+  .log-regime.risk-on { color: var(--green); }
+  .log-regime.neutral { color: var(--amber); }
+  .log-regime.risk-off { color: var(--red); }
+  .log-detail { color: var(--text); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .reset-btn { background: none; border: 1px solid var(--border2); color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 14px; border-radius: 3px; cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.08em; }
+  .reset-btn:hover { color: var(--text); border-color: var(--text); }
+
+  @keyframes pulseBorder {
+    0%   { box-shadow: 0 0 0 0 rgba(232,160,32,0); }
+    30%  { box-shadow: 0 0 0 6px rgba(232,160,32,0.35); }
+    60%  { box-shadow: 0 0 0 3px rgba(232,160,32,0.15); }
+    100% { box-shadow: 0 0 0 0 rgba(232,160,32,0); }
+  }
+  @keyframes pulseBorderGreen {
+    0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+    30%  { box-shadow: 0 0 0 8px rgba(46,204,113,0.4); }
+    60%  { box-shadow: 0 0 0 4px rgba(46,204,113,0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+  }
+  @keyframes pulseBorderAmber {
+    0%   { box-shadow: 0 0 0 0 rgba(243,156,18,0); }
+    30%  { box-shadow: 0 0 0 8px rgba(243,156,18,0.4); }
+    60%  { box-shadow: 0 0 0 4px rgba(243,156,18,0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(243,156,18,0); }
+  }
+  @keyframes pulseBorderRed {
+    0%   { box-shadow: 0 0 0 0 rgba(231,76,60,0); }
+    30%  { box-shadow: 0 0 0 8px rgba(231,76,60,0.4); }
+    60%  { box-shadow: 0 0 0 4px rgba(231,76,60,0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(231,76,60,0); }
+  }
+  @keyframes pulseBorderBlue {
+    0%   { box-shadow: 0 0 0 0 rgba(52,152,219,0); }
+    30%  { box-shadow: 0 0 0 8px rgba(52,152,219,0.4); }
+    60%  { box-shadow: 0 0 0 4px rgba(52,152,219,0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(52,152,219,0); }
+  }
+  .pulse-green  { animation: pulseBorderGreen 1s ease-out 3; }
+  .pulse-amber  { animation: pulseBorderAmber 1s ease-out 3; }
+  .pulse-red    { animation: pulseBorderRed   1s ease-out 3; }
+  .pulse-blue   { animation: pulseBorderBlue  1s ease-out 3; }
+
+  @media (max-width: 700px) {
+    .grid, .grid-3, .banner-row { grid-template-columns: 1fr; }
+    .quadrant-layout { grid-template-columns: 1fr; }
+    .regime-note { display: none; }
+    body { padding: 14px; }
+    .fred-bar { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Market Regime Dashboard</h1>
+      <p>C.OG Framework // Daily Pre-Session Check · v2</p>
+    </div>
+    <div class="header-actions">
+      <button class="reset-btn" onclick="resetAll()">Reset</button>
+      <div class="date-display">
+        <span id="dateDisplay"></span>
+        <span id="timeDisplay"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRED Bar -->
+  <div class="fred-bar">
+    <div class="fred-bar-label">
+      <strong>⚡ FRED Auto-Fill</strong>
+      Loads 2Y yield, curve, HY spread &amp; real yield. Enter remaining fields manually.
+    </div>
+    <div class="fred-fields">
+      <div class="fred-field">
+        <div class="fred-field-label">US 2Y Yield</div>
+        <div class="fred-field-value" id="fred-2y">—</div>
+        <div class="fred-field-sub" id="fred-2y-chg"></div>
+      </div>
+      <div class="fred-field">
+        <div class="fred-field-label">2Y–10Y Spread</div>
+        <div class="fred-field-value" id="fred-curve">—</div>
+        <div class="fred-field-sub" id="fred-curve-chg"></div>
+      </div>
+      <div class="fred-field">
+        <div class="fred-field-label">HY Spread</div>
+        <div class="fred-field-value" id="fred-hy">—</div>
+        <div class="fred-field-sub" id="fred-hy-chg"></div>
+      </div>
+      <div class="fred-field">
+        <div class="fred-field-label">10Y Real Yield</div>
+        <div class="fred-field-value" id="fred-real">—</div>
+        <div class="fred-field-sub" id="fred-real-chg"></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+      <button class="fetch-btn" id="fetchBtn" onclick="fetchAll()">▼ Load FRED Data</button>
+      <div class="fetch-status" id="fetchStatus">Not loaded</div>
+    </div>
+  </div>
+
+  <!-- Macro Regime Quadrant -->
+  <div class="quadrant-section">
+    <div class="quadrant-title">00 — Macro Regime Quadrant <span class="tag tag-manual">Manual · Your Assessment</span></div>
+    <div class="quadrant-layout">
+      <div class="quadrant-controls">
+        <div>
+          <div class="quadrant-control-label">Growth</div>
+          <div class="seg-group">
+            <button class="seg-btn" id="growth-accelerating" onclick="setGrowth('accelerating')">Accel ↑</button>
+            <button class="seg-btn" id="growth-decelerating" onclick="setGrowth('decelerating')">Decel ↓</button>
+          </div>
+        </div>
+        <div>
+          <div class="quadrant-control-label">Inflation</div>
+          <div class="seg-group">
+            <button class="seg-btn" id="inflation-rising" onclick="setInflation('rising')">Rising ↑</button>
+            <button class="seg-btn" id="inflation-falling" onclick="setInflation('falling')">Falling ↓</button>
+          </div>
+        </div>
+        <div class="quadrant-result" id="quadrantResult">
+          <div class="quadrant-result-label">Current Regime</div>
+          <div class="quadrant-result-name" id="quadrantName">Select growth &amp; inflation above</div>
+          <div class="quadrant-result-implications" id="quadrantImplications"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;margin-bottom:4px;">
+          <div class="quadrant-axis-label">Growth ↑</div>
+          <div class="quadrant-axis-label">Growth ↑</div>
+        </div>
+        <div class="quadrant-grid">
+          <div class="quadrant-cell" id="cell-reflation" onclick="selectQuadrant('reflation')">
+            <div class="quadrant-cell-name">REFLATION</div>
+            <div class="quadrant-cell-axes">Growth↑ · Inflation↑</div>
+          </div>
+          <div class="quadrant-cell" id="cell-goldilocks" onclick="selectQuadrant('goldilocks')">
+            <div class="quadrant-cell-name">GOLDILOCKS</div>
+            <div class="quadrant-cell-axes">Growth↑ · Inflation↓</div>
+          </div>
+          <div class="quadrant-cell" id="cell-stagflation" onclick="selectQuadrant('stagflation')">
+            <div class="quadrant-cell-name">STAGFLATION</div>
+            <div class="quadrant-cell-axes">Growth↓ · Inflation↑</div>
+          </div>
+          <div class="quadrant-cell" id="cell-deflation" onclick="selectQuadrant('deflation')">
+            <div class="quadrant-cell-name">DEFLATION</div>
+            <div class="quadrant-cell-axes">Growth↓ · Inflation↓</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;margin-top:4px;">
+          <div class="quadrant-axis-label">Growth ↓</div>
+          <div class="quadrant-axis-label">Growth ↓</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;margin-top:2px;">
+          <div class="quadrant-axis-label">Inflation ↑</div>
+          <div class="quadrant-axis-label">Inflation ↓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dual Regime Banner -->
+  <div class="banner-row" id="bannerRow">
+    <div class="regime-banner pending" id="riskBanner">
+      <div>
+        <div class="regime-label">Risk Regime</div>
+        <div class="regime-value" id="riskValue">AWAITING INPUT</div>
+      </div>
+      <div class="score-ring">
+        <div class="score-circle" id="scoreCircle">—</div>
+        <div class="score-label">Score</div>
+      </div>
+      <div class="regime-note" id="riskNote">Enter data &amp; evaluate</div>
+    </div>
+    <div class="regime-banner pending" id="quadrantBanner">
+      <div>
+        <div class="regime-label">Macro Quadrant</div>
+        <div class="regime-value" id="quadrantBannerValue">NOT SET</div>
+      </div>
+      <div class="regime-note" id="quadrantBannerNote">Select growth &amp; inflation direction above</div>
+    </div>
+  </div>
+
+  <!-- 01: Volatility -->
+  <div class="section-title">01 — Volatility &amp; Fear <span class="tag tag-manual">Manual · TradingView / cboe.com</span></div>
+  <div class="grid" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-header"><span class="card-title">VIX Level</span><div class="card-status" id="dot-vix"></div></div>
+      <div class="card-label">CBOE Volatility Index — search VIX on TradingView</div>
+      <div class="input-group">
+        <input type="number" class="num-input" id="vix" placeholder="e.g. 18" step="0.1" min="5" max="90" oninput="autoEval()">
+        <span class="input-unit">pts</span>
+      </div>
+      <div class="hint" id="hint-vix">— / Sub-15 calm · 15-25 normal · 25-35 elevated · 35+ panic</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">VIX Term Structure</span><div class="card-status" id="dot-vixterm"></div></div>
+      <div class="card-label">Shape of VIX futures curve — vixcentral.com or cboe.com/vix</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="vixterm-contango" onclick="setSeg('vixterm','contango','bull')">Contango ↗</button>
+        <button class="seg-btn" id="vixterm-flat" onclick="setSeg('vixterm','flat','neut')">Flat</button>
+        <button class="seg-btn" id="vixterm-backwardation" onclick="setSeg('vixterm','backwardation','bear')">Backwdtn ↘</button>
+      </div>
+      <div class="hint">Contango = calm · Backwardation = fear / hedging demand</div>
+    </div>
+  </div>
+
+  <!-- 02: Bond Volatility -->
+  <div class="section-title">02 — Bond Volatility <span class="tag tag-manual">Manual · investing.com/indices/move</span></div>
+  <div class="grid" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-header"><span class="card-title">MOVE Index Level</span><div class="card-status" id="dot-move"></div></div>
+      <div class="card-label">ICE BofA Treasury volatility index — bond market's VIX</div>
+      <div class="input-group">
+        <input type="number" class="num-input" id="move" placeholder="e.g. 100" step="1" min="40" max="400" oninput="autoEval()">
+        <span class="input-unit">pts</span>
+      </div>
+      <div class="hint" id="hint-move">— / Below 80 calm · 80-120 normal · 120-150 elevated · 150+ stress</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">MOVE Direction</span><div class="card-status" id="dot-movedirn"></div></div>
+      <div class="card-label">Is bond market volatility rising or falling vs yesterday?</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="movedirn-falling" onclick="setSeg('movedirn','falling','bull')">Falling ↓</button>
+        <button class="seg-btn" id="movedirn-stable" onclick="setSeg('movedirn','stable','neut')">Stable</button>
+        <button class="seg-btn" id="movedirn-rising" onclick="setSeg('movedirn','rising','bear')">Rising ↑</button>
+      </div>
+      <div class="hint">MOVE spikes often precede VIX spikes — an early warning layer</div>
+    </div>
+  </div>
+
+  <!-- 03: Credit -->
+  <div class="section-title">03 — Credit &amp; Funding Stress <span class="tag tag-auto">⚡ Auto-filled · FRED</span></div>
+  <div class="grid" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-header"><span class="card-title">HY Credit Spread (OAS)</span><span class="auto-badge" id="badge-hy">⚡ Auto</span><div class="card-status" id="dot-hy"></div></div>
+      <div class="card-label">High Yield OAS · FRED: BAMLH0A0HYM2</div>
+      <div class="input-group">
+        <input type="number" class="num-input" id="hy" placeholder="Loading..." step="5" min="100" max="1500" oninput="autoEval()">
+        <span class="input-unit">bps</span>
+      </div>
+      <div class="hint" id="hint-hy">— / Below 350 risk-on · 350-500 caution · Above 500 risk-off</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">HY Spread Direction</span><span class="auto-badge" id="badge-hydirn">⚡ Auto</span><div class="card-status" id="dot-hydirn"></div></div>
+      <div class="card-label">Auto-derived — today vs previous FRED observation</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="hydirn-tightening" onclick="setSeg('hydirn','tightening','bull')">Tightening ↓</button>
+        <button class="seg-btn" id="hydirn-stable" onclick="setSeg('hydirn','stable','neut')">Stable</button>
+        <button class="seg-btn" id="hydirn-widening" onclick="setSeg('hydirn','widening','bear')">Widening ↑</button>
+      </div>
+      <div class="hint">Widening &gt;20bps in a day = early warning signal</div>
+    </div>
+  </div>
+
+  <!-- 04: FX -->
+  <div class="section-title">04 — FX Risk Proxies <span class="tag tag-manual">Manual · TradingView</span></div>
+  <div class="grid-3" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-header"><span class="card-title">JPY Direction</span><div class="card-status" id="dot-jpy"></div></div>
+      <div class="card-label">USD/JPY — is yen strengthening or weakening?</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="jpy-weakening" onclick="setSeg('jpy','weakening','bull')">JPY Weak ↑</button>
+        <button class="seg-btn" id="jpy-stable" onclick="setSeg('jpy','stable','neut')">Stable</button>
+        <button class="seg-btn" id="jpy-strengthening" onclick="setSeg('jpy','strengthening','bear')">JPY Strong ↓</button>
+      </div>
+      <div class="hint">JPY strengthening = risk-off / carry unwind</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">AUD/JPY Direction</span><div class="card-status" id="dot-audjpy"></div></div>
+      <div class="card-label">Best single risk-on/off carry proxy</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="audjpy-rising" onclick="setSeg('audjpy','rising','bull')">Rising ↑</button>
+        <button class="seg-btn" id="audjpy-stable" onclick="setSeg('audjpy','stable','neut')">Stable</button>
+        <button class="seg-btn" id="audjpy-falling" onclick="setSeg('audjpy','falling','bear')">Falling ↓</button>
+      </div>
+      <div class="hint">Falling AUD/JPY = carry unwind / risk-off signal</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">DXY Direction</span><div class="card-status" id="dot-dxy"></div></div>
+      <div class="card-label">Dollar index — ticker DXY on TradingView</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="dxy-falling" onclick="setSeg('dxy','falling','bull')">Falling ↓</button>
+        <button class="seg-btn" id="dxy-stable" onclick="setSeg('dxy','stable','neut')">Stable</button>
+        <button class="seg-btn" id="dxy-rising" onclick="setSeg('dxy','rising','bear')">Rising ↑</button>
+      </div>
+      <div class="hint">Rising DXY = headwind for EM, commodities &amp; risk assets</div>
+    </div>
+  </div>
+
+  <!-- 05: Rates -->
+  <div class="section-title">05 — Rates, Curve &amp; Real Yields <span class="tag tag-auto">⚡ Auto-filled · FRED</span></div>
+  <div class="grid" style="margin-bottom:16px">
+    <div class="grid" style="margin-bottom:0">
+      <div class="card">
+        <div class="card-header"><span class="card-title">US 2Y Yield</span><span class="auto-badge" id="badge-2y">⚡ Auto</span><div class="card-status" id="dot-2y"></div></div>
+        <div class="card-label">Policy-sensitive tenor · FRED: DGS2</div>
+        <div class="input-group">
+          <input type="number" class="num-input" id="yield2y" placeholder="Loading..." step="0.01" min="0" max="15" oninput="autoEval()">
+          <span class="input-unit">%</span>
+        </div>
+        <div class="hint">Direction matters more than level</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">2Y Direction</span><span class="auto-badge" id="badge-2ydirn">⚡ Auto</span><div class="card-status" id="dot-2ydirn"></div></div>
+        <div class="card-label">Auto-derived — today vs previous FRED observation</div>
+        <div class="seg-group">
+          <button class="seg-btn" id="y2dirn-falling" onclick="setSeg('y2dirn','falling','bull')">Falling ↓</button>
+          <button class="seg-btn" id="y2dirn-stable" onclick="setSeg('y2dirn','stable','neut')">Stable</button>
+          <button class="seg-btn" id="y2dirn-rising" onclick="setSeg('y2dirn','rising','bear')">Rising ↑</button>
+        </div>
+        <div class="hint">Rising 2Y = tighter conditions being priced in</div>
+      </div>
+    </div>
+    <div class="grid" style="margin-bottom:0">
+      <div class="card">
+        <div class="card-header"><span class="card-title">2Y–10Y Curve</span><span class="auto-badge" id="badge-curve">⚡ Auto</span><div class="card-status" id="dot-curve"></div></div>
+        <div class="card-label">Yield curve slope · FRED: T10Y2Y</div>
+        <div class="seg-group">
+          <button class="seg-btn" id="curve-steep" onclick="setSeg('curve','steep','bull')">Steep +</button>
+          <button class="seg-btn" id="curve-flat" onclick="setSeg('curve','flat','neut')">Flat</button>
+          <button class="seg-btn" id="curve-inverted" onclick="setSeg('curve','inverted','bear')">Inverted</button>
+        </div>
+        <div class="hint" id="hint-curve">Inversion = recession signal 6-18m ahead</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">10Y Real Yield</span><span class="auto-badge" id="badge-real">⚡ Auto</span><div class="card-status" id="dot-real"></div></div>
+        <div class="card-label">TIPS yield · FRED: DFII10 · drives gold &amp; growth stocks</div>
+        <div class="seg-group">
+          <button class="seg-btn" id="real-falling" onclick="setSeg('real','falling','bull')">Falling ↓</button>
+          <button class="seg-btn" id="real-stable" onclick="setSeg('real','stable','neut')">Stable</button>
+          <button class="seg-btn" id="real-rising" onclick="setSeg('real','rising','bear')">Rising ↑</button>
+        </div>
+        <div class="hint" id="hint-real">Rising real yields = headwind for gold &amp; growth stocks</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06: Safe Havens -->
+  <div class="section-title">06 — Equities &amp; Safe Havens <span class="tag tag-manual">Manual · TradingView</span></div>
+  <div class="grid" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Stocks vs Bonds Correlation</span><div class="card-status" id="dot-corr"></div></div>
+      <div class="card-label">Are SPY and TLT moving opposite (normal) or together (stress)?</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="corr-negative" onclick="setSeg('corr','negative','bull')">Negative (normal)</button>
+        <button class="seg-btn" id="corr-positive" onclick="setSeg('corr','positive','bear')">Positive (stress)</button>
+      </div>
+      <div class="hint">Both falling together = inflation regime / normal relationships broken</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Gold Direction</span><div class="card-status" id="dot-gold"></div></div>
+      <div class="card-label">XAUUSD on TradingView — watch alongside real yields</div>
+      <div class="seg-group">
+        <button class="seg-btn" id="gold-falling" onclick="setSeg('gold','falling','bull')">Falling ↓</button>
+        <button class="seg-btn" id="gold-stable" onclick="setSeg('gold','stable','neut')">Stable</button>
+        <button class="seg-btn" id="gold-rising" onclick="setSeg('gold','rising','bear')">Rising ↑</button>
+      </div>
+      <div class="hint">Gold rising + real yields falling = classic flight-to-quality</div>
+    </div>
+  </div>
+
+  <button class="eval-btn" onclick="evaluateRegime()">▶ Evaluate Regime</button>
+
+  <div id="resultSection" style="display:none">
+    <div class="section-title">Signal Breakdown</div>
+    <div class="checklist" id="checklist"></div>
+  </div>
+
+  <div class="log-section" id="logSection" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin:0;border:none;padding:0">Session Log</div>
+      <button class="reset-btn" onclick="clearLog()">Clear</button>
+    </div>
+    <div id="logEntries"></div>
+  </div>
+
+</div>
+<script>
+  const FRED_KEY = '%%FRED_API_KEY%%';
+  const PROXY = 'https://corsproxy.io/?';
+  const segState = {};
+  let fredLoaded = false;
+  const fredData = {};
+  let growthState = null, inflationState = null, quadrantState = null;
+
+  // ── QUADRANT LOGIC ────────────────────────────────────────────────
+  const QUADRANT_INFO = {
+    goldilocks: {
+      name: 'GOLDILOCKS',
+      color: 'var(--green)',
+      implications: 'Growth↑ Inflation↓\n▸ Equities OW · Growth > Value\n▸ Credit OW · Duration neutral\n▸ Sell volatility · EM supportive\n▸ Gold selective · USD neutral'
+    },
+    reflation: {
+      name: 'REFLATION',
+      color: 'var(--amber)',
+      implications: 'Growth↑ Inflation↑\n▸ Equities OW · Value > Growth\n▸ Commodities OW · TIPS OW\n▸ Duration UW · Banks outperform\n▸ Gold supported · USD firm'
+    },
+    stagflation: {
+      name: 'STAGFLATION',
+      color: 'var(--red)',
+      implications: 'Growth↓ Inflation↑\n▸ Equities UW · Defensives OW\n▸ Gold/Energy OW · Cash OW\n▸ Credit UW · Duration complex\n▸ Worst outcome — nowhere to hide'
+    },
+    deflation: {
+      name: 'DEFLATION',
+      color: 'var(--blue)',
+      implications: 'Growth↓ Inflation↓\n▸ Duration max OW · IG only\n▸ Equities UW · Quality factor OW\n▸ JPY/CHF/USD safe havens\n▸ Gold bid on real yield collapse · Long vol'
+    }
+  };
+
+  function deriveQuadrant() {
+    if (!growthState || !inflationState) return null;
+    if (growthState === 'accelerating' && inflationState === 'falling') return 'goldilocks';
+    if (growthState === 'accelerating' && inflationState === 'rising') return 'reflation';
+    if (growthState === 'decelerating' && inflationState === 'rising') return 'stagflation';
+    if (growthState === 'decelerating' && inflationState === 'falling') return 'deflation';
+    return null;
+  }
+
+  function setGrowth(val) {
+    growthState = val;
+    document.getElementById('growth-accelerating').className = 'seg-btn' + (val==='accelerating'?' active-bull':'');
+    document.getElementById('growth-decelerating').className = 'seg-btn' + (val==='decelerating'?' active-bear':'');
+    updateQuadrantFromControls();
+  }
+
+  function setInflation(val) {
+    inflationState = val;
+    document.getElementById('inflation-rising').className = 'seg-btn' + (val==='rising'?' active-bear':'');
+    document.getElementById('inflation-falling').className = 'seg-btn' + (val==='falling'?' active-bull':'');
+    updateQuadrantFromControls();
+  }
+
+  function updateQuadrantFromControls() {
+    const q = deriveQuadrant();
+    if (q) applyQuadrant(q);
+  }
+
+  function selectQuadrant(q) {
+    // Direct cell click — also set the controls to match
+    if (q === 'goldilocks') { growthState = 'accelerating'; inflationState = 'falling'; }
+    else if (q === 'reflation') { growthState = 'accelerating'; inflationState = 'rising'; }
+    else if (q === 'stagflation') { growthState = 'decelerating'; inflationState = 'rising'; }
+    else if (q === 'deflation') { growthState = 'decelerating'; inflationState = 'falling'; }
+    document.getElementById('growth-accelerating').className = 'seg-btn' + (growthState==='accelerating'?' active-bull':'');
+    document.getElementById('growth-decelerating').className = 'seg-btn' + (growthState==='decelerating'?' active-bear':'');
+    document.getElementById('inflation-rising').className = 'seg-btn' + (inflationState==='rising'?' active-bear':'');
+    document.getElementById('inflation-falling').className = 'seg-btn' + (inflationState==='falling'?' active-bull':'');
+    applyQuadrant(q);
+  }
+
+  function applyQuadrant(q) {
+    quadrantState = q;
+    const info = QUADRANT_INFO[q];
+    // Update cells
+    ['goldilocks','reflation','stagflation','deflation'].forEach(name => {
+      document.getElementById('cell-'+name).className = 'quadrant-cell' + (name===q?' active-'+name:'');
+    });
+    // Update result box
+    document.getElementById('quadrantName').textContent = info.name;
+    document.getElementById('quadrantName').style.color = info.color;
+    document.getElementById('quadrantImplications').textContent = info.implications;
+    // Update banner
+    const banner = document.getElementById('quadrantBanner');
+    banner.className = 'regime-banner ' + q;
+    document.getElementById('quadrantBannerValue').textContent = info.name;
+    document.getElementById('quadrantBannerNote').textContent = getQuadrantNote(q);
+  }
+
+  function getQuadrantNote(q) {
+    const notes = {
+      goldilocks: 'Best environment for risk assets. Central banks accommodative.',
+      reflation: 'Growth strong but inflation rising. Value beats growth. Watch CB pivot.',
+      stagflation: 'Most difficult regime. Nowhere to hide. Reduce risk, hold real assets.',
+      deflation: 'Flight to quality. CB easing aggressively. Duration and safe havens.'
+    };
+    return notes[q] || '';
+  }
+
+  // ── FRED FETCH ────────────────────────────────────────────────────
+  function fredURL(id) {
+    const base = 'https://api.stlouisfed.org/fred/series/observations?series_id='+id+'&api_key='+FRED_KEY+'&sort_order=desc&limit=3&file_type=json';
+    return PROXY + encodeURIComponent(base);
+  }
+
+  async function fetchSeries(id) {
+    const r = await fetch(fredURL(id));
+    if (!r.ok) throw new Error(id+' HTTP '+r.status);
+    const d = await r.json();
+    if (!d.observations) throw new Error(id+': no data');
+    return d.observations.filter(o => o.value !== '.');
+  }
+
+  async function fetchAll() {
+    const btn = document.getElementById('fetchBtn');
+    const status = document.getElementById('fetchStatus');
+    btn.disabled = true; btn.textContent = '⏳ Loading...';
+    status.className = 'fetch-status loading'; status.textContent = 'Fetching...';
+    try {
+      status.textContent = 'Loading 2Y yield...';
+      fredData.y2 = await fetchSeries('DGS2');
+      status.textContent = 'Loading curve...';
+      fredData.curve = await fetchSeries('T10Y2Y');
+      status.textContent = 'Loading HY spread...';
+      fredData.hy = await fetchSeries('BAMLH0A0HYM2');
+      status.textContent = 'Loading real yield...';
+      fredData.real = await fetchSeries('DFII10');
+      applyFredData();
+      fredLoaded = true;
+      const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      status.className = 'fetch-status success'; status.textContent = '✓ Loaded '+t;
+      btn.textContent = '↺ Refresh'; btn.disabled = false;
+      autoEval();
+    } catch(err) {
+      status.className = 'fetch-status error';
+      status.textContent = '✗ '+err.message;
+      btn.textContent = '▼ Retry'; btn.disabled = false;
+    }
+  }
+
+  function applyFredData() {
+    // 2Y
+    if (fredData.y2 && fredData.y2.length >= 2) {
+      const cur = parseFloat(fredData.y2[0].value), prev = parseFloat(fredData.y2[1].value);
+      const chg = cur - prev;
+      setFV('fred-2y', cur.toFixed(2)+'%', 'fred-2y-chg', (chg>=0?'▲ +':'▼ ')+chg.toFixed(3)+'%', chg>0.005?'up':chg<-0.005?'down':'');
+      const el = document.getElementById('yield2y'); el.value = cur.toFixed(2); el.classList.add('autofilled');
+      showBadge('badge-2y');
+      const dir = chg>0.015?'rising':chg<-0.015?'falling':'stable';
+      setSeg('y2dirn', dir, dir==='rising'?'bear':dir==='falling'?'bull':'neut', true);
+      showBadge('badge-2ydirn');
+      const d = document.getElementById('dot-2y'); d.className='card-status '+(dir==='falling'?'bullish':dir==='rising'?'bearish':'neutral');
+    }
+    // Curve
+    if (fredData.curve && fredData.curve.length >= 2) {
+      const cur = parseFloat(fredData.curve[0].value), chg = cur - parseFloat(fredData.curve[1].value);
+      const inv = cur < -0.05;
+      setFV('fred-curve', cur.toFixed(2)+'%', 'fred-curve-chg', (chg>=0?'▲ steepening':'▼ flattening')+(inv?' · INVERTED':''), inv?'up':'');
+      const val = inv?'inverted':cur<0.2?'flat':'steep';
+      setSeg('curve', val, val==='steep'?'bull':val==='flat'?'neut':'bear', true);
+      showBadge('badge-curve');
+      document.getElementById('hint-curve').textContent = 'Spread: '+cur.toFixed(2)+'% — '+(inv?'⚠ Inverted · recession signal active':cur<0.2?'Near flat · monitor':'Normal slope');
+    }
+    // HY
+    if (fredData.hy && fredData.hy.length >= 2) {
+      const cur = parseFloat(fredData.hy[0].value), prev = parseFloat(fredData.hy[1].value);
+      const chg = cur - prev;
+      setFV('fred-hy', cur.toFixed(0)+'bps', 'fred-hy-chg', (chg>=0?'▲ +':'▼ ')+chg.toFixed(1)+'bps', chg>5?'up':chg<-5?'down':'');
+      const el = document.getElementById('hy'); el.value = cur.toFixed(0); el.classList.add('autofilled');
+      showBadge('badge-hy');
+      const dir = chg>5?'widening':chg<-5?'tightening':'stable';
+      setSeg('hydirn', dir, dir==='tightening'?'bull':dir==='stable'?'neut':'bear', true);
+      showBadge('badge-hydirn');
+      document.getElementById('hint-hy').textContent = cur.toFixed(0)+'bps — '+(cur<350?'Risk-on territory':cur<500?'Caution zone':'Risk-off · stress elevated');
+    }
+    // Real Yield
+    if (fredData.real && fredData.real.length >= 2) {
+      const cur = parseFloat(fredData.real[0].value), prev = parseFloat(fredData.real[1].value);
+      const chg = cur - prev;
+      setFV('fred-real', cur.toFixed(2)+'%', 'fred-real-chg', (chg>=0?'▲ +':'▼ ')+chg.toFixed(3)+'%', chg>0.01?'up':chg<-0.01?'down':'');
+      showBadge('badge-real');
+      const dir = chg>0.01?'rising':chg<-0.01?'falling':'stable';
+      setSeg('real', dir, dir==='falling'?'bull':dir==='stable'?'neut':'bear', true);
+      document.getElementById('hint-real').textContent = 'Real yield: '+cur.toFixed(2)+'% — '+(cur<0?'Negative · supportive for gold & growth':cur<1?'Low positive · neutral':cur<2?'Rising real rates · headwind for gold':'High real rates · strong headwind');
+    }
+  }
+
+  function setFV(vid, v, cid, c, cls) {
+    const el=document.getElementById(vid); if(el){el.textContent=v;el.classList.add('loaded');}
+    const cel=document.getElementById(cid); if(cel){cel.textContent=c;cel.className='fred-field-sub'+(cls?' '+cls:'');}
+  }
+  function showBadge(id){const e=document.getElementById(id);if(e)e.classList.add('visible');}
+
+  // ── SEGMENT BUTTONS ───────────────────────────────────────────────
+  function setSeg(group, value, type, isAuto) {
+    segState[group] = {value, type};
+    document.querySelectorAll('[id^="'+group+'-"]').forEach(b=>b.className='seg-btn');
+    const btn=document.getElementById(group+'-'+value);
+    if(btn) btn.classList.add('active-'+type);
+    const dot=document.getElementById('dot-'+group);
+    if(dot){dot.className='card-status';dot.classList.add(type==='bull'?'bullish':type==='neut'?'neutral':'bearish');}
+    autoEval();
+  }
+
+  // ── AUTO EVAL ─────────────────────────────────────────────────────
+  function autoEval() {
+    const vix=parseFloat(document.getElementById('vix').value);
+    const hy=parseFloat(document.getElementById('hy').value);
+    const move=parseFloat(document.getElementById('move').value);
+    if(!isNaN(vix)){
+      const dot=document.getElementById('dot-vix'),hint=document.getElementById('hint-vix');
+      dot.className='card-status';
+      if(vix<15){dot.classList.add('bullish');hint.textContent=vix+' — Calm. Risk-on conditions.';}
+      else if(vix<25){dot.classList.add('neutral');hint.textContent=vix+' — Normal. Monitor for changes.';}
+      else if(vix<35){dot.classList.add('bearish');hint.textContent=vix+' — Elevated stress. Reduce exposure.';}
+      else{dot.classList.add('bearish');hint.textContent=vix+' — PANIC. Crisis mode.';}
+    }
+    if(!isNaN(hy)){
+      const dot=document.getElementById('dot-hy');dot.className='card-status';
+      dot.classList.add(hy<350?'bullish':hy<500?'neutral':'bearish');
+    }
+    if(!isNaN(move)){
+      const dot=document.getElementById('dot-move'),hint=document.getElementById('hint-move');
+      dot.className='card-status';
+      if(move<80){dot.classList.add('bullish');hint.textContent=move+' — Low bond vol. Calm rate environment.';}
+      else if(move<120){dot.classList.add('neutral');hint.textContent=move+' — Normal. Typical rate uncertainty.';}
+      else if(move<150){dot.classList.add('bearish');hint.textContent=move+' — Elevated. Watch for equity vol spillover.';}
+      else{dot.classList.add('bearish');hint.textContent=move+' — High stress. Equity vol likely to follow.';}
+    }
+  }
+
+  // ── EVALUATE ─────────────────────────────────────────────────────
+  function evaluateRegime() {
+    const vix=parseFloat(document.getElementById('vix').value);
+    const hy=parseFloat(document.getElementById('hy').value);
+    const move=parseFloat(document.getElementById('move').value);
+    let score=0, total=0, checks=[];
+
+    // VIX level
+    if(!isNaN(vix)){total++;
+      if(vix<15){score+=1;checks.push({t:'bull',i:'✓',tx:'VIX '+vix+' — Calm. Sub-15 = risk-on environment.',s:'RISK-ON'});}
+      else if(vix<25){score+=0.5;checks.push({t:'neut',i:'~',tx:'VIX '+vix+' — Normal. No extreme signal.',s:'NEUTRAL'});}
+      else if(vix<35){checks.push({t:'bear',i:'✗',tx:'VIX '+vix+' — Elevated stress. Reduce gross exposure.',s:'CAUTION'});}
+      else{checks.push({t:'bear',i:'✗',tx:'VIX '+vix+' — PANIC level. Cash is king.',s:'RISK-OFF'});}}
+    // VIX term
+    if(segState.vixterm){total++;const v=segState.vixterm;
+      if(v.value==='contango'){score+=1;checks.push({t:'bull',i:'✓',tx:'VIX in contango — calm, no hedging panic.',s:'RISK-ON'});}
+      else if(v.value==='flat'){score+=0.5;checks.push({t:'neut',i:'~',tx:'VIX term structure flat — transitioning.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'VIX in backwardation — fear elevated, hedging demand spiking.',s:'RISK-OFF'});}}
+    // MOVE
+    if(!isNaN(move)){total++;
+      if(move<80){score+=1;checks.push({t:'bull',i:'✓',tx:'MOVE '+move+' — Bond vol calm. No rate stress signal.',s:'RISK-ON'});}
+      else if(move<120){score+=0.5;checks.push({t:'neut',i:'~',tx:'MOVE '+move+' — Normal. Typical uncertainty range.',s:'NEUTRAL'});}
+      else if(move<150){checks.push({t:'bear',i:'✗',tx:'MOVE '+move+' — Elevated bond vol. Watch for equity spillover.',s:'CAUTION'});}
+      else{checks.push({t:'bear',i:'✗',tx:'MOVE '+move+' — High bond stress. Equity vol likely to follow.',s:'RISK-OFF'});}}
+    // MOVE direction
+    if(segState.movedirn){total++;const v=segState.movedirn;
+      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'MOVE falling — bond vol easing. Rate stress reducing.',s:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'MOVE stable — no directional bond vol signal.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'MOVE rising — early warning. Bond vol often leads equity vol.',s:'CAUTION'});}}
+    // HY spread
+    if(!isNaN(hy)){total++;
+      if(hy<350){score+=1;checks.push({t:'bull',i:'✓',tx:'HY '+hy+'bps — Credit relaxed. Risk appetite healthy.',s:'RISK-ON'});}
+      else if(hy<500){score+=0.5;checks.push({t:'neut',i:'~',tx:'HY '+hy+'bps — Caution zone. Monitor for widening.',s:'CAUTION'});}
+      else{checks.push({t:'bear',i:'✗',tx:'HY '+hy+'bps — Risk-off. Credit stress elevated.',s:'RISK-OFF'});}}
+    // HY direction
+    if(segState.hydirn){total++;const v=segState.hydirn;
+      if(v.value==='tightening'){score+=1;checks.push({t:'bull',i:'✓',tx:'Spreads tightening — risk appetite expanding.',s:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Spreads stable — no strong directional signal.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'Spreads widening — early warning. Watch >20bps/day.',s:'CAUTION'});}}
+    // JPY
+    if(segState.jpy){total++;const v=segState.jpy;
+      if(v.value==='weakening'){score+=1;checks.push({t:'bull',i:'✓',tx:'JPY weakening — carry intact. Risk appetite supportive.',s:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'JPY stable — no carry unwind signal.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'JPY strengthening — carry unwind in progress. Risk-off flows.',s:'RISK-OFF'});}}
+    // AUD/JPY
+    if(segState.audjpy){total++;const v=segState.audjpy;
+      if(v.value==='rising'){score+=1;checks.push({t:'bull',i:'✓',tx:'AUD/JPY rising — risk-on proxy confirming appetite.',s:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'AUD/JPY stable — no strong regime signal.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'AUD/JPY falling — risk-off / carry unwind signal.',s:'RISK-OFF'});}}
+    // DXY
+    if(segState.dxy){total++;const v=segState.dxy;
+      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'DXY falling — risk-on. EM, commodities & growth supportive.',s:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'DXY stable — no strong dollar regime signal.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'DXY rising — headwind for EM, commodities & risk assets.',s:'CAUTION'});}}
+    // 2Y direction
+    if(segState.y2dirn){total++;const v=segState.y2dirn;
+      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'2Y yield falling — easier conditions being priced in.',s:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'2Y yield stable — no strong rate direction signal.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'2Y yield rising — tighter conditions ahead. Headwind for risk.',s:'CAUTION'});}}
+    // Curve
+    if(segState.curve){total++;const v=segState.curve;
+      if(v.value==='steep'){score+=1;checks.push({t:'bull',i:'✓',tx:'Curve steep — healthy growth expectations.',s:'RISK-ON'});}
+      else if(v.value==='flat'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Curve flat — slowing growth. Watch for inversion.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'Curve inverted — recession signal. 6-18m lead time.',s:'WARNING'});}}
+    // Real yield
+    if(segState.real){total++;const v=segState.real;
+      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'Real yields falling — tailwind for gold & growth stocks.',s:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Real yields stable — neutral for gold & growth.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'Real yields rising — headwind for gold & growth stocks.',s:'CAUTION'});}}
+    // Correlation
+    if(segState.corr){total++;const v=segState.corr;
+      if(v.value==='negative'){score+=1;checks.push({t:'bull',i:'✓',tx:'Stocks/bonds negative correlation — normal regime.',s:'NORMAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'Stocks/bonds positive — inflation regime / relationships broken.',s:'STRESS'});}}
+    // Gold
+    if(segState.gold){total++;const v=segState.gold;
+      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'Gold falling — no flight-to-quality. Real rates supportive.',s:'RISK-ON'});}
+      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Gold stable — no strong safe-haven signal.',s:'NEUTRAL'});}
+      else{checks.push({t:'bear',i:'✗',tx:'Gold rising — flight-to-quality forming. Check real yields.',s:'CAUTION'});}}
+
+    if(total===0){alert('Please enter at least one reading.');return;}
+    const pct=score/total;
+    let regime,cls,note;
+    if(pct>=0.65){regime='RISK-ON';cls='risk-on';note='Indicators broadly supportive. Standard position sizing appropriate.';}
+    else if(pct>=0.35){regime='NEUTRAL / MIXED';cls='neutral';note='Mixed signals. Reduce size on speculative positions.';}
+    else{regime='RISK-OFF';cls='risk-off';note='3+ indicators warning. Reduce gross exposure.';}
+    const sc=Math.round(pct*100);
+
+    const riskBanner=document.getElementById('riskBanner');
+    riskBanner.className='regime-banner '+cls;
+    document.getElementById('riskValue').textContent=regime;
+    document.getElementById('riskNote').textContent=note;
+    const circle=document.getElementById('scoreCircle');
+    circle.textContent=sc;
+    circle.style.color=pct>=0.65?'var(--green)':pct>=0.35?'var(--amber)':'var(--red)';
+
+    // Scroll to banner row and pulse
+    const bannerRow = document.getElementById('bannerRow');
+    if (bannerRow) {
+      setTimeout(() => {
+        bannerRow.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+      // Pick pulse colour based on risk regime
+      const pulseClass = pct>=0.65 ? 'pulse-green' : pct>=0.35 ? 'pulse-amber' : 'pulse-red';
+      // Pick quadrant pulse colour
+      const qPulse = quadrantState==='deflation' ? 'pulse-blue' : quadrantState==='goldilocks' ? 'pulse-green' : quadrantState==='reflation' ? 'pulse-amber' : quadrantState ? 'pulse-red' : pulseClass;
+      [document.getElementById('riskBanner'), document.getElementById('quadrantBanner')].forEach((el, i) => {
+        if (!el) return;
+        el.classList.remove('pulse-green','pulse-amber','pulse-red','pulse-blue');
+        void el.offsetWidth; // force reflow so animation restarts
+        el.classList.add(i===0 ? pulseClass : qPulse);
+        el.addEventListener('animationend', () => el.classList.remove('pulse-green','pulse-amber','pulse-red','pulse-blue'), { once: true });
+      });
+    }
+
+    const cl=document.getElementById('checklist');cl.innerHTML='';
+    checks.forEach((c,i)=>{
+      const d=document.createElement('div');
+      d.className='check-item '+c.t; d.style.animationDelay=(i*0.04)+'s';
+      d.innerHTML='<span class="check-icon">'+c.i+'</span><span class="check-text">'+c.tx+'</span><span class="check-signal">'+c.s+'</span>';
+      cl.appendChild(d);
+    });
+    document.getElementById('resultSection').style.display='block';
+    addLog(regime,cls,sc,total);
+  }
+
+  // ── LOG ───────────────────────────────────────────────────────────
+  const log=[];
+  function addLog(regime,cls,score,indicators){
+    const now=new Date();
+    const t=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const q=quadrantState?QUADRANT_INFO[quadrantState].name:'—';
+    log.unshift({t,regime,cls,score,indicators,q,src:fredLoaded?'⚡ FRED+Manual':'Manual'});
+    renderLog(); document.getElementById('logSection').style.display='block';
+  }
+  function renderLog(){
+    const c=document.getElementById('logEntries');c.innerHTML='';
+    log.slice(0,8).forEach(e=>{
+      const d=document.createElement('div');d.className='log-entry';
+      d.innerHTML='<span class="log-time">'+e.t+'</span><span class="log-regime '+e.cls+'">'+e.regime+'</span><span class="log-detail">Score '+e.score+'/100 · Quadrant: '+e.q+' · '+e.src+'</span>';
+      c.appendChild(d);
+    });
+  }
+  function clearLog(){log.length=0;document.getElementById('logSection').style.display='none';}
+
+  // ── RESET ─────────────────────────────────────────────────────────
+  function resetAll(){
+    ['vix','hy','yield2y','move'].forEach(id=>{
+      const el=document.getElementById(id);if(el){el.value='';el.classList.remove('autofilled');}
+    });
+    ['vixterm','movedirn','hydirn','jpy','audjpy','dxy','y2dirn','curve','real','corr','gold'].forEach(g=>{
+      delete segState[g];
+      document.querySelectorAll('[id^="'+g+'-"]').forEach(b=>b.className='seg-btn');
+      const dot=document.getElementById('dot-'+g);if(dot)dot.className='card-status';
+    });
+    ['dot-vix','dot-hy','dot-2y','dot-move'].forEach(id=>{const d=document.getElementById(id);if(d)d.className='card-status';});
+    ['badge-hy','badge-hydirn','badge-2y','badge-2ydirn','badge-curve','badge-real'].forEach(id=>{
+      const b=document.getElementById(id);if(b)b.classList.remove('visible');
+    });
+    ['fred-2y','fred-curve','fred-hy','fred-real'].forEach(id=>{
+      const el=document.getElementById(id);if(el){el.textContent='—';el.classList.remove('loaded');}
+    });
+    ['fred-2y-chg','fred-curve-chg','fred-hy-chg','fred-real-chg'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.textContent='';
+    });
+    // Reset quadrant
+    growthState=null; inflationState=null; quadrantState=null;
+    ['goldilocks','reflation','stagflation','deflation'].forEach(n=>{
+      const c=document.getElementById('cell-'+n);if(c)c.className='quadrant-cell';
+    });
+    ['growth-accelerating','growth-decelerating','inflation-rising','inflation-falling'].forEach(id=>{
+      const b=document.getElementById(id);if(b)b.className='seg-btn';
+    });
+    document.getElementById('quadrantName').textContent='Select growth & inflation above';
+    document.getElementById('quadrantName').style.color='';
+    document.getElementById('quadrantImplications').textContent='';
+    document.getElementById('quadrantBanner').className='regime-banner pending';
+    document.getElementById('quadrantBannerValue').textContent='NOT SET';
+    document.getElementById('quadrantBannerNote').textContent='Select growth & inflation direction above';
+    // Reset banners
+    document.getElementById('riskBanner').className='regime-banner pending';
+    document.getElementById('riskValue').textContent='AWAITING INPUT';
+    document.getElementById('riskNote').textContent='Enter data & evaluate';
+    document.getElementById('scoreCircle').textContent='—';
+    document.getElementById('scoreCircle').style.color='';
+    document.getElementById('resultSection').style.display='none';
+    document.getElementById('hint-vix').textContent='— / Sub-15 calm · 15-25 normal · 25-35 elevated · 35+ panic';
+    document.getElementById('hint-hy').textContent='— / Below 350 risk-on · 350-500 caution · Above 500 risk-off';
+    document.getElementById('hint-move').textContent='— / Below 80 calm · 80-120 normal · 120-150 elevated · 150+ stress';
+    document.getElementById('hint-curve').textContent='Inversion = recession signal 6-18m ahead';
+    document.getElementById('hint-real').textContent='Rising real yields = headwind for gold & growth stocks';
+    document.getElementById('fetchStatus').textContent='Not loaded';
+    document.getElementById('fetchStatus').className='fetch-status';
+    document.getElementById('fetchBtn').textContent='▼ Load FRED Data';
+    document.getElementById('fetchBtn').disabled=false;
+    fredLoaded=false;
+    Object.keys(fredData).forEach(k=>delete fredData[k]);
+  }
+
+  // ── CLOCK ─────────────────────────────────────────────────────────
+  function updateClock(){
+    const now=new Date();
+    document.getElementById('dateDisplay').textContent=now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+    document.getElementById('timeDisplay').textContent=now.toLocaleTimeString('en-GB')+' GMT';
+  }
+  updateClock(); setInterval(updateClock,1000);
+</script>
+</body>
+</html>
