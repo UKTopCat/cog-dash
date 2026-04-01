@@ -4,6 +4,9 @@ on:
   push:
     branches: [ main ]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,8 +20,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Inject API key
+        env:
+          FRED_KEY: ${{ secrets.FRED_API_KEY }}
         run: |
-          sed -i "s/%%FRED_API_KEY%%/${{ secrets.FRED_API_KEY }}/g" risk_dashboard.html
+          sed -i "s/%%FRED_API_KEY%%/${FRED_KEY}/g" risk_dashboard.html
+          echo "Injection complete. Checking result:"
+          grep -o "FRED_KEY = '.\{6\}" risk_dashboard.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
