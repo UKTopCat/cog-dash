@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NQ System Position Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1a1f35 50%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #e2e8f0;
+    }
+    
+    .container {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      max-width: 500px;
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #f1f5f9;
+      letter-spacing: -0.5px;
+    }
+    
+    .subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    
+    .section:last-of-type {
+      border-bottom: none;
+    }
+    
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #0f172a;
+      color: #f1f5f9;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.2s ease;
+    }
+    
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      background: #1e293b;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      background: #0f172a;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    button.active {
+      background: #3b82f6;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+    
+    button:not(.active):hover {
+      border-color: rgba(148, 163, 184, 0.3);
+      background: rgba(59, 130, 246, 0.05);
+    }
+    
+    .result-card {
+      background: rgba(59, 130, 246, 0.05);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .result-label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    
+    .result-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #60a5fa;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -0.5px;
+    }
+    
+    .result-secondary {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .info-box {
+      background: rgba(148, 163, 184, 0.05);
+      border-left: 2px solid #3b82f6;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    
+    .info-box:last-of-type {
+      margin-bottom: 0;
+    }
+    
+    .info-box strong {
+      color: #f1f5f9;
+      font-weight: 600;
+    }
+    
+    .info-box.warning {
+      border-left-color: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>NQ System</h1>
+    <div class="subtitle">Position Calculator</div>
+    
+    <div class="section">
+      <div class="section-title">Stop Loss Level</div>
+      
+      <div class="form-group">
+        <label for="entry">Entry price</label>
+        <input type="number" id="entry" value="25191" step="0.01">
+      </div>
+      
+      <div class="form-group">
+        <label for="stop">Stop %</label>
+        <input type="number" id="stop" value="0.55" step="0.01" min="0">
+      </div>
+      
+      <div class="form-group">
+        <label>Direction</label>
+        <div class="button-group">
+          <button id="long-btn" class="active">Long</button>
+          <button id="short-btn">Short</button>
+        </div>
+      </div>
+      
+      <div class="result-card">
+        <div class="result-label">SL Level</div>
+        <div class="result-value" id="slResult">25052.45</div>
+        <div class="result-secondary">Distance: <span id="distanceResult">138.55</span> pts</div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Maximum Loss at Stop</div>
+      
+      <div class="form-group">
+        <label for="accountSize">Account size ($)</label>
+        <input type="number" id="accountSize" value="100000" step="100">
+      </div>
+      
+      <div class="form-group">
+        <label for="riskPercent">Risk % of account</label>
+        <input type="number" id="riskPercent" value="1.85" step="0.01" min="0" max="100">
+      </div>
+      
+      <div class="result-card">
+        <div class="result-label">Max Loss</div>
+        <div class="result-value" id="maxLossResult">$1,850.00</div>
+        <div class="result-secondary">Contracts (Micro NQ @ $20/pt): <span id="microContracts">0.67</span></div>
+        <div class="result-secondary">Contracts (NQ @ $100/pt): <span id="standardContracts">0.13</span></div>
+      </div>
+      
+      <div class="info-box">
+        <strong>Contract sizing:</strong> Assumes fractional lots. Round down to whole contracts for live trading.
+      </div>
+      
+      <div class="info-box warning">
+        <strong>Risk %:</strong> Defaults assume standard prop firm rules (FTMO-aligned). Verify your specific account terms and adjust accordingly.
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const entryInput = document.getElementById('entry');
+    const stopInput = document.getElementById('stop');
+    const slResultEl = document.getElementById('slResult');
+    const distanceResultEl = document.getElementById('distanceResult');
+    
+    const accountSizeInput = document.getElementById('accountSize');
+    const riskPercentInput = document.getElementById('riskPercent');
+    const maxLossResultEl = document.getElementById('maxLossResult');
+    const microContractsEl = document.getElementById('microContracts');
+    const standardContractsEl = document.getElementById('standardContracts');
+    
+    const longBtn = document.getElementById('long-btn');
+    const shortBtn = document.getElementById('short-btn');
+    
+    let direction = 'long';
+    
+    function calculateSL() {
+      const entry = parseFloat(entryInput.value);
+      const stopPct = parseFloat(stopInput.value) / 100;
+      
+      if (!isNaN(entry) && !isNaN(stopPct)) {
+        let sl;
+        if (direction === 'long') {
+          sl = entry - (entry * stopPct);
+        } else {
+          sl = entry + (entry * stopPct);
+        }
+        
+        const distance = Math.abs(sl - entry);
+        
+        slResultEl.textContent = sl.toFixed(2);
+        distanceResultEl.textContent = distance.toFixed(2);
+        
+        calculateRisk(distance);
+      }
+    }
+    
+    function calculateRisk(distance) {
+      const accountSize = parseFloat(accountSizeInput.value);
+      const riskPct = parseFloat(riskPercentInput.value) / 100;
+      
+      if (!isNaN(accountSize) && !isNaN(riskPct) && distance > 0) {
+        const maxLoss = accountSize * riskPct;
+        const microContractSize = 20;
+        const standardContractSize = 100;
+        
+        const microContracts = maxLoss / (distance * microContractSize);
+        const standardContracts = maxLoss / (distance * standardContractSize);
+        
+        maxLossResultEl.textContent = '$' + maxLoss.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        microContractsEl.textContent = microContracts.toFixed(2);
+        standardContractsEl.textContent = standardContracts.toFixed(2);
+      }
+    }
+    
+    function setDirection(newDirection) {
+      direction = newDirection;
+      
+      if (newDirection === 'long') {
+        longBtn.classList.add('active');
+        shortBtn.classList.remove('active');
+      } else {
+        shortBtn.classList.add('active');
+        longBtn.classList.remove('active');
+      }
+      
+      calculateSL();
+    }
+    
+    entryInput.addEventListener('input', calculateSL);
+    stopInput.addEventListener('input', calculateSL);
+    accountSizeInput.addEventListener('input', calculateSL);
+    riskPercentInput.addEventListener('input', calculateSL);
+    longBtn.addEventListener('click', () => setDirection('long'));
+    shortBtn.addEventListener('click', () => setDirection('short'));
+    
+    calculateSL();
+  </script>
+</body>
+</html>
