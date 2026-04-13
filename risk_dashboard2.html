@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,6 +32,14 @@
   .date-display { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); text-align: right; }
   .date-display span { display: block; color: var(--text); font-size: 13px; margin-bottom: 2px; }
   .header-actions { display: flex; align-items: center; gap: 12px; }
+
+  /* Tab Navigation */
+  .tab-nav { display: flex; border-bottom: 1px solid var(--border2); margin-bottom: 20px; gap: 0; }
+  .tab-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 20px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
 
   /* FRED bar */
   .fred-bar { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -126,6 +135,7 @@
   .num-input:focus { border-color: var(--accent); }
   .num-input::placeholder { color: var(--muted); font-size: 13px; }
   .num-input.autofilled { border-color: rgba(232,160,32,0.5); background: rgba(232,160,32,0.05); }
+  .num-input-wide { width: 140px; }
   .input-group { display: flex; gap: 8px; align-items: center; }
   .input-unit { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
   .seg-group { display: flex; border: 1px solid var(--border2); border-radius: 3px; overflow: hidden; width: 100%; }
@@ -205,12 +215,100 @@
   .pulse-red    { animation: pulseBorderRed   1s ease-out 3; }
   .pulse-blue   { animation: pulseBorderBlue  1s ease-out 3; }
 
+  /* ── TAB 2: PRE-SESSION TRADING ── */
+
+  /* ATR Sizing Output */
+  .sizing-output { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 16px; margin-top: 12px; }
+  .sizing-output-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .sizing-result { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 12px; }
+  .sizing-result-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+  .sizing-result-value { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: var(--text); }
+  .sizing-result-value.vol-low { color: var(--green); }
+  .sizing-result-value.vol-normal { color: var(--amber); }
+  .sizing-result-value.vol-elevated { color: #f39c12; }
+  .sizing-result-value.vol-high { color: var(--red); }
+  .sizing-result-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .atr-regime-badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 2px; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 6px; }
+  .atr-regime-badge.low { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+  .atr-regime-badge.normal { background: rgba(243,156,18,0.15); color: var(--amber); border: 1px solid rgba(243,156,18,0.3); }
+  .atr-regime-badge.elevated { background: rgba(243,156,18,0.2); color: #f39c12; border: 1px solid rgba(243,156,18,0.4); }
+  .atr-regime-badge.high { background: rgba(231,76,60,0.15); color: var(--red); border: 1px solid rgba(231,76,60,0.3); }
+
+  /* OI Levels */
+  .oi-visual { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 16px; margin-top: 12px; }
+  .oi-bar-container { position: relative; height: 60px; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; margin: 12px 0; }
+  .oi-bar-fill { position: absolute; top: 0; bottom: 0; background: rgba(52,152,219,0.15); transition: all 0.4s; }
+  .oi-level-line { position: absolute; top: 0; bottom: 0; width: 2px; }
+  .oi-level-line.call-wall { background: var(--red); }
+  .oi-level-line.put-wall { background: var(--green); }
+  .oi-level-line.max-pain { background: var(--amber); }
+  .oi-level-line.current-price { background: var(--blue); width: 2px; }
+  .oi-labels { display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+  .oi-label-item { display: flex; align-items: center; gap: 4px; }
+  .oi-label-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .oi-label-dot.call-wall { background: var(--red); }
+  .oi-label-dot.put-wall { background: var(--green); }
+  .oi-label-dot.max-pain { background: var(--amber); }
+  .oi-label-dot.current { background: var(--blue); }
+  .oi-position-text { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text); margin-top: 8px; padding: 8px; background: var(--surface); border-radius: 3px; border-left: 3px solid var(--accent); }
+
+  /* Trade Log Tab 2 */
+  .trade-form { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-bottom: 16px; }
+  .trade-form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+  .trade-form-field { display: flex; flex-direction: column; gap: 4px; }
+  .trade-form-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .trade-input { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 8px 10px; border-radius: 3px; width: 100%; outline: none; transition: border-color 0.2s; }
+  .trade-input:focus { border-color: var(--accent); }
+  .trade-select { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 8px 10px; border-radius: 3px; width: 100%; outline: none; cursor: pointer; }
+  .add-trade-btn { padding: 10px 20px; background: var(--accent); color: #0a0c0f; border: none; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .add-trade-btn:hover { background: #f5b030; }
+
+  /* Trade Table */
+  .trade-table-wrapper { overflow-x: auto; }
+  .trade-table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+  .trade-table th { text-align: left; padding: 8px 10px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); border-bottom: 1px solid var(--border2); white-space: nowrap; }
+  .trade-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--text); white-space: nowrap; }
+  .trade-table tr:last-child td { border-bottom: none; }
+  .trade-table tr:hover td { background: var(--surface2); }
+  .r-positive { color: var(--green); font-weight: 600; }
+  .r-negative { color: var(--red); font-weight: 600; }
+  .r-neutral { color: var(--muted); }
+  .dir-long { color: var(--green); }
+  .dir-short { color: var(--red); }
+  .delete-trade-btn { background: none; border: 1px solid var(--border2); color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 2px; cursor: pointer; }
+  .delete-trade-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Stats bar */
+  .stats-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 12px; text-align: center; }
+  .stat-box-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+  .stat-box-value { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; color: var(--text); }
+  .stat-box-value.positive { color: var(--green); }
+  .stat-box-value.negative { color: var(--red); }
+
+  /* Weekly bias */
+  .weekly-bias-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-bottom: 16px; }
+  .bias-seg-group { display: flex; border: 1px solid var(--border2); border-radius: 3px; overflow: hidden; }
+  .bias-seg-btn { flex: 1; padding: 10px 4px; background: var(--surface2); border: none; color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.15s; border-right: 1px solid var(--border2); letter-spacing: 0.03em; text-transform: uppercase; }
+  .bias-seg-btn:last-child { border-right: none; }
+  .bias-seg-btn:hover { background: var(--border); color: var(--text); }
+  .bias-seg-btn.active-expansion { background: rgba(231,76,60,0.15); color: var(--red); }
+  .bias-seg-btn.active-normal { background: rgba(243,156,18,0.15); color: var(--amber); }
+  .bias-seg-btn.active-contraction { background: rgba(46,204,113,0.15); color: var(--green); }
+  .bias-display { margin-top: 10px; padding: 10px 12px; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.6; border-left: 3px solid var(--border2); background: var(--surface2); }
+  .bias-display.expansion { border-left-color: var(--red); }
+  .bias-display.normal { border-left-color: var(--amber); }
+  .bias-display.contraction { border-left-color: var(--green); }
+
+  .empty-state { text-align: center; padding: 40px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
+
   @media (max-width: 700px) {
-    .grid, .grid-3, .banner-row { grid-template-columns: 1fr; }
+    .grid, .grid-3, .banner-row, .trade-form-grid, .stats-bar { grid-template-columns: 1fr; }
     .quadrant-layout { grid-template-columns: 1fr; }
     .regime-note { display: none; }
     body { padding: 14px; }
     .fred-bar { flex-direction: column; }
+    .sizing-output-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -220,7 +318,7 @@
   <div class="header">
     <div class="header-left">
       <h1>Market Regime Dashboard</h1>
-      <p>C.OG Framework // Daily Pre-Session Check · v2</p>
+      <p>C.OG Framework // Daily Pre-Session Check · v3</p>
     </div>
     <div class="header-actions">
       <button class="reset-btn" onclick="resetAll()">Reset</button>
@@ -230,6 +328,17 @@
       </div>
     </div>
   </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('macro')" id="tab-macro">01 · Macro Regime</button>
+    <button class="tab-btn" onclick="switchTab('trading')" id="tab-trading">02 · Pre-Session Trading</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- TAB 1: MACRO REGIME (existing dashboard) -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="tab-content active" id="content-macro">
 
   <!-- FRED Bar -->
   <div class="fred-bar">
@@ -541,59 +650,309 @@
     <div id="logEntries"></div>
   </div>
 
-</div>
+  </div><!-- end tab-content macro -->
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- TAB 2: PRE-SESSION TRADING -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="content-trading">
+
+    <!-- Weekly Regime Bias -->
+    <div class="section-title">A — Weekly Volatility Regime <span class="tag tag-manual">Set Sunday Evening</span></div>
+    <div class="weekly-bias-card">
+      <div class="card-label" style="margin-bottom:10px">Classify this week's expected volatility regime based on last week's range and ATR direction.</div>
+      <div class="bias-seg-group">
+        <button class="bias-seg-btn" id="bias-expansion" onclick="setWeeklyBias('expansion')">📈 Expansion Week</button>
+        <button class="bias-seg-btn" id="bias-normal" onclick="setWeeklyBias('normal')">➡ Normal Week</button>
+        <button class="bias-seg-btn" id="bias-contraction" onclick="setWeeklyBias('contraction')">📉 Contraction Week</button>
+      </div>
+      <div class="bias-display" id="biasDisplay">Select regime above to see trading implications.</div>
+    </div>
+
+    <!-- ATR Position Sizer -->
+    <div class="section-title" style="margin-top:8px">B — ATR Position Sizer <span class="tag tag-manual">Manual · TradingView ATR(14) Daily</span></div>
+    <div class="grid">
+      <!-- NQ -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">NQ — Nasdaq 100</span><div class="card-status" id="dot-nq-atr"></div></div>
+        <div class="card-label">Enter the ATR(14) value from TradingView daily chart</div>
+        <div class="input-group" style="margin-bottom:10px">
+          <input type="number" class="num-input num-input-wide" id="nq-atr" placeholder="e.g. 380" step="1" min="50" max="2000" oninput="calcSizing()">
+          <span class="input-unit">points</span>
+        </div>
+        <div class="card-label" style="margin-top:8px">Topstep buffer remaining</div>
+        <div class="input-group" style="margin-bottom:6px">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-right:4px">$</span>
+          <input type="number" class="num-input num-input-wide" id="nq-topstep-buffer" placeholder="e.g. 3232" step="1" min="0" oninput="calcSizing()">
+        </div>
+        <div class="card-label">Ufunded buffer remaining</div>
+        <div class="input-group">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-right:4px">$</span>
+          <input type="number" class="num-input num-input-wide" id="nq-ufunded-buffer" placeholder="e.g. 4184" step="1" min="0" oninput="calcSizing()">
+        </div>
+      </div>
+
+      <!-- Gold -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">Gold — XAUUSD</span><div class="card-status" id="dot-gold-atr"></div></div>
+        <div class="card-label">Enter the ATR(14) value from TradingView daily chart</div>
+        <div class="input-group" style="margin-bottom:10px">
+          <input type="number" class="num-input num-input-wide" id="gold-atr" placeholder="e.g. 160" step="0.1" min="10" max="1000" oninput="calcSizing()">
+          <span class="input-unit">points</span>
+        </div>
+        <div class="card-label" style="margin-top:8px">Risk % per trade (default 1%)</div>
+        <div class="input-group" style="margin-bottom:6px">
+          <input type="number" class="num-input num-input-wide" id="risk-pct" placeholder="1" step="0.1" min="0.1" max="5" value="1" oninput="calcSizing()">
+          <span class="input-unit">%</span>
+        </div>
+        <div class="card-label">Stop multiplier (ATR × ?)</div>
+        <div class="input-group">
+          <input type="number" class="num-input num-input-wide" id="stop-mult" placeholder="1" step="0.1" min="0.5" max="3" value="1" oninput="calcSizing()">
+          <span class="input-unit">× ATR</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sizing Output -->
+    <div class="sizing-output" id="sizingOutput" style="display:none">
+      <div class="section-title" style="margin-bottom:12px;border:none;padding:0">Position Sizing Output</div>
+      <div class="sizing-output-grid">
+        <!-- NQ Topstep -->
+        <div class="sizing-result">
+          <div class="sizing-result-label">NQ · Topstep</div>
+          <div class="sizing-result-value" id="out-nq-topstep">—</div>
+          <div class="sizing-result-sub" id="out-nq-topstep-sub"></div>
+          <div id="out-nq-topstep-regime"></div>
+        </div>
+        <!-- NQ Ufunded -->
+        <div class="sizing-result">
+          <div class="sizing-result-label">NQ · Ufunded</div>
+          <div class="sizing-result-value" id="out-nq-ufunded">—</div>
+          <div class="sizing-result-sub" id="out-nq-ufunded-sub"></div>
+          <div id="out-nq-ufunded-regime"></div>
+        </div>
+        <!-- Gold Sizing -->
+        <div class="sizing-result">
+          <div class="sizing-result-label">Gold · Stop Distance</div>
+          <div class="sizing-result-value" id="out-gold-stop">—</div>
+          <div class="sizing-result-sub" id="out-gold-stop-sub"></div>
+          <div id="out-gold-regime"></div>
+        </div>
+        <!-- Expected Range -->
+        <div class="sizing-result">
+          <div class="sizing-result-label">NQ · Expected Daily Range</div>
+          <div class="sizing-result-value" id="out-nq-range">—</div>
+          <div class="sizing-result-sub" id="out-nq-range-sub"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OI Levels -->
+    <div class="section-title" style="margin-top:20px">C — Open Interest Levels <span class="tag tag-manual">Manual · CME Heatmap · NQ</span></div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Key OI Levels</span></div>
+        <div class="card-label" style="margin-bottom:12px">Enter levels from CME OI heatmap (converted to spot equivalent)</div>
+        <div class="trade-form-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0">
+          <div class="trade-form-field">
+            <div class="trade-form-label">🔴 Call Wall (Resistance)</div>
+            <input type="number" class="trade-input" id="oi-call-wall" placeholder="e.g. 21500" step="25" oninput="updateOIVisual()">
+          </div>
+          <div class="trade-form-field">
+            <div class="trade-form-label">🟢 Put Wall (Support)</div>
+            <input type="number" class="trade-input" id="oi-put-wall" placeholder="e.g. 20800" step="25" oninput="updateOIVisual()">
+          </div>
+          <div class="trade-form-field">
+            <div class="trade-form-label">🟡 Max Pain</div>
+            <input type="number" class="trade-input" id="oi-max-pain" placeholder="e.g. 21100" step="25" oninput="updateOIVisual()">
+          </div>
+          <div class="trade-form-field">
+            <div class="trade-form-label">🔵 Current Price (NQ)</div>
+            <input type="number" class="trade-input" id="oi-current" placeholder="e.g. 21050" step="25" oninput="updateOIVisual()">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">OI Structure Map</span></div>
+        <div class="oi-visual">
+          <div class="oi-labels" style="margin-bottom:8px">
+            <span class="oi-label-item"><span class="oi-label-dot put-wall"></span>Put Wall</span>
+            <span class="oi-label-item"><span class="oi-label-dot max-pain"></span>Max Pain</span>
+            <span class="oi-label-item"><span class="oi-label-dot current"></span>Current</span>
+            <span class="oi-label-item"><span class="oi-label-dot call-wall"></span>Call Wall</span>
+          </div>
+          <div class="oi-bar-container" id="oiBar">
+            <div class="oi-bar-fill" id="oiBarFill"></div>
+            <div class="oi-level-line put-wall" id="oiPutLine" style="left:10%"></div>
+            <div class="oi-level-line max-pain" id="oiPainLine" style="left:45%"></div>
+            <div class="oi-level-line current-price" id="oiCurrentLine" style="left:40%"></div>
+            <div class="oi-level-line call-wall" id="oiCallLine" style="left:80%"></div>
+          </div>
+          <div class="oi-position-text" id="oiPositionText">Enter levels to see structure analysis.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trade Log -->
+    <div class="section-title" style="margin-top:20px">D — Trade Log <span class="tag tag-manual">Persistent · Stored Locally</span></div>
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-box"><div class="stat-box-label">Total Trades</div><div class="stat-box-value" id="stat-total">0</div></div>
+      <div class="stat-box"><div class="stat-box-label">Win Rate</div><div class="stat-box-value" id="stat-winrate">—</div></div>
+      <div class="stat-box"><div class="stat-box-label">Avg R</div><div class="stat-box-value" id="stat-avgr">—</div></div>
+      <div class="stat-box"><div class="stat-box-label">Best Trade</div><div class="stat-box-value positive" id="stat-best">—</div></div>
+      <div class="stat-box"><div class="stat-box-label">Worst Trade</div><div class="stat-box-value negative" id="stat-worst">—</div></div>
+    </div>
+
+    <!-- Add Trade Form -->
+    <div class="trade-form">
+      <div class="section-title" style="margin-bottom:12px;border:none;padding:0">Log a Trade</div>
+      <div class="trade-form-grid">
+        <div class="trade-form-field">
+          <div class="trade-form-label">Date</div>
+          <input type="date" class="trade-input" id="tl-date">
+        </div>
+        <div class="trade-form-field">
+          <div class="trade-form-label">Instrument</div>
+          <select class="trade-select" id="tl-instrument">
+            <option value="NQ">NQ (Nasdaq)</option>
+            <option value="Gold">Gold</option>
+            <option value="MNQ">MNQ (Micro NQ)</option>
+            <option value="MGC">MGC (Micro Gold)</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="trade-form-field">
+          <div class="trade-form-label">Account</div>
+          <select class="trade-select" id="tl-account">
+            <option value="Topstep">Topstep</option>
+            <option value="Ufunded">Ufunded</option>
+            <option value="Vantage">Vantage</option>
+          </select>
+        </div>
+        <div class="trade-form-field">
+          <div class="trade-form-label">Direction</div>
+          <select class="trade-select" id="tl-direction">
+            <option value="Long">Long</option>
+            <option value="Short">Short</option>
+          </select>
+        </div>
+        <div class="trade-form-field">
+          <div class="trade-form-label">Entry</div>
+          <input type="number" class="trade-input" id="tl-entry" placeholder="e.g. 21050" step="0.01">
+        </div>
+        <div class="trade-form-field">
+          <div class="trade-form-label">Stop</div>
+          <input type="number" class="trade-input" id="tl-stop" placeholder="e.g. 20935" step="0.01">
+        </div>
+        <div class="trade-form-field">
+          <div class="trade-form-label">Target</div>
+          <input type="number" class="trade-input" id="tl-target" placeholder="e.g. 21165" step="0.01">
+        </div>
+        <div class="trade-form-field">
+          <div class="trade-form-label">Exit Price</div>
+          <input type="number" class="trade-input" id="tl-exit" placeholder="e.g. 21140" step="0.01">
+        </div>
+        <div class="trade-form-field">
+          <div class="trade-form-label">Result</div>
+          <select class="trade-select" id="tl-result">
+            <option value="Win">Win</option>
+            <option value="Loss">Loss</option>
+            <option value="BE">Breakeven</option>
+            <option value="Partial">Partial</option>
+            <option value="Open">Still Open</option>
+          </select>
+        </div>
+      </div>
+      <div class="trade-form-field" style="margin-bottom:12px">
+        <div class="trade-form-label">Notes (optional)</div>
+        <input type="text" class="trade-input" id="tl-notes" placeholder="e.g. C.OG signal, Iran news, hit SL on gap...">
+      </div>
+      <button class="add-trade-btn" onclick="addTrade()">+ Add Trade</button>
+    </div>
+
+    <!-- Trade Table -->
+    <div class="log-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin:0;border:none;padding:0">Trade History</div>
+        <button class="reset-btn" onclick="clearTrades()">Clear All</button>
+      </div>
+      <div class="trade-table-wrapper">
+        <table class="trade-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Instrument</th>
+              <th>Account</th>
+              <th>Dir</th>
+              <th>Entry</th>
+              <th>Stop</th>
+              <th>Target</th>
+              <th>Exit</th>
+              <th>R</th>
+              <th>Result</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tradeTableBody">
+            <tr><td colspan="12"><div class="empty-state">No trades logged yet. Add your first trade above.</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- end tab-content trading -->
+
+</div><!-- end container -->
+
 <script>
+  // ── FRED KEY ──────────────────────────────────────────────────────
   const FRED_KEY = '%%FRED_API_KEY%%';
   const PROXY = 'https://corsproxy.io/?';
   const segState = {};
   let fredLoaded = false;
   const fredData = {};
   let growthState = null, inflationState = null, quadrantState = null;
+  let weeklyBias = null;
+
+  // ── TAB SWITCHING ─────────────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    document.getElementById('content-'+tab).classList.add('active');
+  }
 
   // ── QUADRANT LOGIC ────────────────────────────────────────────────
   const QUADRANT_INFO = {
-    goldilocks: {
-      name: 'GOLDILOCKS',
-      color: 'var(--green)',
-      implications: 'Growth↑ Inflation↓\n▸ Equities OW · Growth > Value\n▸ Credit OW · Duration neutral\n▸ Sell volatility · EM supportive\n▸ Gold selective · USD neutral'
-    },
-    reflation: {
-      name: 'REFLATION',
-      color: 'var(--amber)',
-      implications: 'Growth↑ Inflation↑\n▸ Equities OW · Value > Growth\n▸ Commodities OW · TIPS OW\n▸ Duration UW · Banks outperform\n▸ Gold supported · USD firm'
-    },
-    stagflation: {
-      name: 'STAGFLATION',
-      color: 'var(--red)',
-      implications: 'Growth↓ Inflation↑\n▸ Equities UW · Defensives OW\n▸ Gold/Energy OW · Cash OW\n▸ Credit UW · Duration complex\n▸ Worst outcome — nowhere to hide'
-    },
-    deflation: {
-      name: 'DEFLATION',
-      color: 'var(--blue)',
-      implications: 'Growth↓ Inflation↓\n▸ Duration max OW · IG only\n▸ Equities UW · Quality factor OW\n▸ JPY/CHF/USD safe havens\n▸ Gold bid on real yield collapse · Long vol'
-    }
+    goldilocks: { name: 'GOLDILOCKS', color: 'var(--green)', implications: 'Growth↑ Inflation↓\n▸ Equities OW · Growth > Value\n▸ Credit OW · Duration neutral\n▸ Sell volatility · EM supportive\n▸ Gold selective · USD neutral' },
+    reflation:  { name: 'REFLATION',  color: 'var(--amber)', implications: 'Growth↑ Inflation↑\n▸ Equities OW · Value > Growth\n▸ Commodities OW · TIPS OW\n▸ Duration UW · Banks outperform\n▸ Gold supported · USD firm' },
+    stagflation:{ name: 'STAGFLATION',color: 'var(--red)',   implications: 'Growth↓ Inflation↑\n▸ Equities UW · Defensives OW\n▸ Gold/Energy OW · Cash OW\n▸ Credit UW · Duration complex\n▸ Worst outcome — nowhere to hide' },
+    deflation:  { name: 'DEFLATION',  color: 'var(--blue)',  implications: 'Growth↓ Inflation↓\n▸ Duration max OW · IG only\n▸ Equities UW · Quality factor OW\n▸ JPY/CHF/USD safe havens\n▸ Gold bid on real yield collapse · Long vol' }
   };
 
   function deriveQuadrant() {
     if (!growthState || !inflationState) return null;
-    if (growthState === 'accelerating' && inflationState === 'falling') return 'goldilocks';
-    if (growthState === 'accelerating' && inflationState === 'rising') return 'reflation';
-    if (growthState === 'decelerating' && inflationState === 'rising') return 'stagflation';
-    if (growthState === 'decelerating' && inflationState === 'falling') return 'deflation';
+    if (growthState==='accelerating' && inflationState==='falling') return 'goldilocks';
+    if (growthState==='accelerating' && inflationState==='rising')  return 'reflation';
+    if (growthState==='decelerating' && inflationState==='rising')  return 'stagflation';
+    if (growthState==='decelerating' && inflationState==='falling') return 'deflation';
     return null;
   }
 
   function setGrowth(val) {
     growthState = val;
-    document.getElementById('growth-accelerating').className = 'seg-btn' + (val==='accelerating'?' active-bull':'');
-    document.getElementById('growth-decelerating').className = 'seg-btn' + (val==='decelerating'?' active-bear':'');
+    document.getElementById('growth-accelerating').className='seg-btn'+(val==='accelerating'?' active-bull':'');
+    document.getElementById('growth-decelerating').className='seg-btn'+(val==='decelerating'?' active-bear':'');
     updateQuadrantFromControls();
   }
 
   function setInflation(val) {
     inflationState = val;
-    document.getElementById('inflation-rising').className = 'seg-btn' + (val==='rising'?' active-bear':'');
-    document.getElementById('inflation-falling').className = 'seg-btn' + (val==='falling'?' active-bull':'');
+    document.getElementById('inflation-rising').className='seg-btn'+(val==='rising'?' active-bear':'');
+    document.getElementById('inflation-falling').className='seg-btn'+(val==='falling'?' active-bull':'');
     updateQuadrantFromControls();
   }
 
@@ -603,30 +962,26 @@
   }
 
   function selectQuadrant(q) {
-    // Direct cell click — also set the controls to match
-    if (q === 'goldilocks') { growthState = 'accelerating'; inflationState = 'falling'; }
-    else if (q === 'reflation') { growthState = 'accelerating'; inflationState = 'rising'; }
-    else if (q === 'stagflation') { growthState = 'decelerating'; inflationState = 'rising'; }
-    else if (q === 'deflation') { growthState = 'decelerating'; inflationState = 'falling'; }
-    document.getElementById('growth-accelerating').className = 'seg-btn' + (growthState==='accelerating'?' active-bull':'');
-    document.getElementById('growth-decelerating').className = 'seg-btn' + (growthState==='decelerating'?' active-bear':'');
-    document.getElementById('inflation-rising').className = 'seg-btn' + (inflationState==='rising'?' active-bear':'');
-    document.getElementById('inflation-falling').className = 'seg-btn' + (inflationState==='falling'?' active-bull':'');
+    if (q==='goldilocks') { growthState='accelerating'; inflationState='falling'; }
+    else if (q==='reflation') { growthState='accelerating'; inflationState='rising'; }
+    else if (q==='stagflation') { growthState='decelerating'; inflationState='rising'; }
+    else if (q==='deflation') { growthState='decelerating'; inflationState='falling'; }
+    document.getElementById('growth-accelerating').className='seg-btn'+(growthState==='accelerating'?' active-bull':'');
+    document.getElementById('growth-decelerating').className='seg-btn'+(growthState==='decelerating'?' active-bear':'');
+    document.getElementById('inflation-rising').className='seg-btn'+(inflationState==='rising'?' active-bear':'');
+    document.getElementById('inflation-falling').className='seg-btn'+(inflationState==='falling'?' active-bull':'');
     applyQuadrant(q);
   }
 
   function applyQuadrant(q) {
     quadrantState = q;
     const info = QUADRANT_INFO[q];
-    // Update cells
     ['goldilocks','reflation','stagflation','deflation'].forEach(name => {
-      document.getElementById('cell-'+name).className = 'quadrant-cell' + (name===q?' active-'+name:'');
+      document.getElementById('cell-'+name).className='quadrant-cell'+(name===q?' active-'+name:'');
     });
-    // Update result box
     document.getElementById('quadrantName').textContent = info.name;
     document.getElementById('quadrantName').style.color = info.color;
     document.getElementById('quadrantImplications').textContent = info.implications;
-    // Update banner
     const banner = document.getElementById('quadrantBanner');
     banner.className = 'regime-banner ' + q;
     document.getElementById('quadrantBannerValue').textContent = info.name;
@@ -634,19 +989,12 @@
   }
 
   function getQuadrantNote(q) {
-    const notes = {
-      goldilocks: 'Best environment for risk assets. Central banks accommodative.',
-      reflation: 'Growth strong but inflation rising. Value beats growth. Watch CB pivot.',
-      stagflation: 'Most difficult regime. Nowhere to hide. Reduce risk, hold real assets.',
-      deflation: 'Flight to quality. CB easing aggressively. Duration and safe havens.'
-    };
-    return notes[q] || '';
+    return { goldilocks:'Best environment for risk assets. Central banks accommodative.', reflation:'Growth strong but inflation rising. Value beats growth. Watch CB pivot.', stagflation:'Most difficult regime. Nowhere to hide. Reduce risk, hold real assets.', deflation:'Flight to quality. CB easing aggressively. Duration and safe havens.' }[q] || '';
   }
 
   // ── FRED FETCH ────────────────────────────────────────────────────
   function fredURL(id) {
-    const base = 'https://api.stlouisfed.org/fred/series/observations?series_id='+id+'&api_key='+FRED_KEY+'&sort_order=desc&limit=3&file_type=json';
-    return PROXY + encodeURIComponent(base);
+    return PROXY + encodeURIComponent('https://api.stlouisfed.org/fred/series/observations?series_id='+id+'&api_key='+FRED_KEY+'&sort_order=desc&limit=3&file_type=json');
   }
 
   async function fetchSeries(id) {
@@ -658,91 +1006,69 @@
   }
 
   async function fetchAll() {
-    const btn = document.getElementById('fetchBtn');
-    const status = document.getElementById('fetchStatus');
-    btn.disabled = true; btn.textContent = '⏳ Loading...';
-    status.className = 'fetch-status loading'; status.textContent = 'Fetching...';
+    const btn=document.getElementById('fetchBtn'), status=document.getElementById('fetchStatus');
+    btn.disabled=true; btn.textContent='⏳ Loading...';
+    status.className='fetch-status loading'; status.textContent='Fetching...';
     try {
-      status.textContent = 'Loading 2Y yield...';
-      fredData.y2 = await fetchSeries('DGS2');
-      status.textContent = 'Loading curve...';
-      fredData.curve = await fetchSeries('T10Y2Y');
-      status.textContent = 'Loading HY spread...';
-      fredData.hy = await fetchSeries('BAMLH0A0HYM2');
-      status.textContent = 'Loading real yield...';
-      fredData.real = await fetchSeries('DFII10');
-      applyFredData();
-      fredLoaded = true;
-      const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-      status.className = 'fetch-status success'; status.textContent = '✓ Loaded '+t;
-      btn.textContent = '↺ Refresh'; btn.disabled = false;
-      autoEval();
+      status.textContent='Loading 2Y yield...'; fredData.y2=await fetchSeries('DGS2');
+      status.textContent='Loading curve...'; fredData.curve=await fetchSeries('T10Y2Y');
+      status.textContent='Loading HY spread...'; fredData.hy=await fetchSeries('BAMLH0A0HYM2');
+      status.textContent='Loading real yield...'; fredData.real=await fetchSeries('DFII10');
+      applyFredData(); fredLoaded=true;
+      const t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      status.className='fetch-status success'; status.textContent='✓ Loaded '+t;
+      btn.textContent='↺ Refresh'; btn.disabled=false; autoEval();
     } catch(err) {
-      status.className = 'fetch-status error';
-      status.textContent = '✗ '+err.message;
-      btn.textContent = '▼ Retry'; btn.disabled = false;
+      status.className='fetch-status error'; status.textContent='✗ '+err.message;
+      btn.textContent='▼ Retry'; btn.disabled=false;
     }
   }
 
   function applyFredData() {
-    // 2Y
-    if (fredData.y2 && fredData.y2.length >= 2) {
-      const cur = parseFloat(fredData.y2[0].value), prev = parseFloat(fredData.y2[1].value);
-      const chg = cur - prev;
-      setFV('fred-2y', cur.toFixed(2)+'%', 'fred-2y-chg', (chg>=0?'▲ +':'▼ ')+chg.toFixed(3)+'%', chg>0.005?'up':chg<-0.005?'down':'');
-      const el = document.getElementById('yield2y'); el.value = cur.toFixed(2); el.classList.add('autofilled');
-      showBadge('badge-2y');
-      const dir = chg>0.015?'rising':chg<-0.015?'falling':'stable';
-      setSeg('y2dirn', dir, dir==='rising'?'bear':dir==='falling'?'bull':'neut', true);
-      showBadge('badge-2ydirn');
-      const d = document.getElementById('dot-2y'); d.className='card-status '+(dir==='falling'?'bullish':dir==='rising'?'bearish':'neutral');
+    if (fredData.y2 && fredData.y2.length>=2) {
+      const cur=parseFloat(fredData.y2[0].value), prev=parseFloat(fredData.y2[1].value), chg=cur-prev;
+      setFV('fred-2y',cur.toFixed(2)+'%','fred-2y-chg',(chg>=0?'▲ +':'▼ ')+chg.toFixed(3)+'%',chg>0.005?'up':chg<-0.005?'down':'');
+      const el=document.getElementById('yield2y'); el.value=cur.toFixed(2); el.classList.add('autofilled'); showBadge('badge-2y');
+      const dir=chg>0.015?'rising':chg<-0.015?'falling':'stable';
+      setSeg('y2dirn',dir,dir==='rising'?'bear':dir==='falling'?'bull':'neut',true); showBadge('badge-2ydirn');
+      document.getElementById('dot-2y').className='card-status '+(dir==='falling'?'bullish':dir==='rising'?'bearish':'neutral');
     }
-    // Curve
-    if (fredData.curve && fredData.curve.length >= 2) {
-      const cur = parseFloat(fredData.curve[0].value), chg = cur - parseFloat(fredData.curve[1].value);
-      const inv = cur < -0.05;
-      setFV('fred-curve', cur.toFixed(2)+'%', 'fred-curve-chg', (chg>=0?'▲ steepening':'▼ flattening')+(inv?' · INVERTED':''), inv?'up':'');
-      const val = inv?'inverted':cur<0.2?'flat':'steep';
-      setSeg('curve', val, val==='steep'?'bull':val==='flat'?'neut':'bear', true);
-      showBadge('badge-curve');
-      document.getElementById('hint-curve').textContent = 'Spread: '+cur.toFixed(2)+'% — '+(inv?'⚠ Inverted · recession signal active':cur<0.2?'Near flat · monitor':'Normal slope');
+    if (fredData.curve && fredData.curve.length>=2) {
+      const cur=parseFloat(fredData.curve[0].value), chg=cur-parseFloat(fredData.curve[1].value), inv=cur<-0.05;
+      setFV('fred-curve',cur.toFixed(2)+'%','fred-curve-chg',(chg>=0?'▲ steepening':'▼ flattening')+(inv?' · INVERTED':''),inv?'up':'');
+      const val=inv?'inverted':cur<0.2?'flat':'steep';
+      setSeg('curve',val,val==='steep'?'bull':val==='flat'?'neut':'bear',true); showBadge('badge-curve');
+      document.getElementById('hint-curve').textContent='Spread: '+cur.toFixed(2)+'% — '+(inv?'⚠ Inverted · recession signal active':cur<0.2?'Near flat · monitor':'Normal slope');
     }
-    // HY
-    if (fredData.hy && fredData.hy.length >= 2) {
-      const cur = parseFloat(fredData.hy[0].value), prev = parseFloat(fredData.hy[1].value);
-      const chg = cur - prev;
-      setFV('fred-hy', cur.toFixed(0)+'bps', 'fred-hy-chg', (chg>=0?'▲ +':'▼ ')+chg.toFixed(1)+'bps', chg>5?'up':chg<-5?'down':'');
-      const el = document.getElementById('hy'); el.value = cur.toFixed(0); el.classList.add('autofilled');
-      showBadge('badge-hy');
-      const dir = chg>5?'widening':chg<-5?'tightening':'stable';
-      setSeg('hydirn', dir, dir==='tightening'?'bull':dir==='stable'?'neut':'bear', true);
-      showBadge('badge-hydirn');
-      document.getElementById('hint-hy').textContent = cur.toFixed(0)+'bps — '+(cur<350?'Risk-on territory':cur<500?'Caution zone':'Risk-off · stress elevated');
+    if (fredData.hy && fredData.hy.length>=2) {
+      const cur=parseFloat(fredData.hy[0].value), prev=parseFloat(fredData.hy[1].value), chg=cur-prev;
+      setFV('fred-hy',cur.toFixed(0)+'bps','fred-hy-chg',(chg>=0?'▲ +':'▼ ')+chg.toFixed(1)+'bps',chg>5?'up':chg<-5?'down':'');
+      const el=document.getElementById('hy'); el.value=cur.toFixed(0); el.classList.add('autofilled'); showBadge('badge-hy');
+      const dir=chg>5?'widening':chg<-5?'tightening':'stable';
+      setSeg('hydirn',dir,dir==='tightening'?'bull':dir==='stable'?'neut':'bear',true); showBadge('badge-hydirn');
+      document.getElementById('hint-hy').textContent=cur.toFixed(0)+'bps — '+(cur<350?'Risk-on territory':cur<500?'Caution zone':'Risk-off · stress elevated');
     }
-    // Real Yield
-    if (fredData.real && fredData.real.length >= 2) {
-      const cur = parseFloat(fredData.real[0].value), prev = parseFloat(fredData.real[1].value);
-      const chg = cur - prev;
-      setFV('fred-real', cur.toFixed(2)+'%', 'fred-real-chg', (chg>=0?'▲ +':'▼ ')+chg.toFixed(3)+'%', chg>0.01?'up':chg<-0.01?'down':'');
+    if (fredData.real && fredData.real.length>=2) {
+      const cur=parseFloat(fredData.real[0].value), prev=parseFloat(fredData.real[1].value), chg=cur-prev;
+      setFV('fred-real',cur.toFixed(2)+'%','fred-real-chg',(chg>=0?'▲ +':'▼ ')+chg.toFixed(3)+'%',chg>0.01?'up':chg<-0.01?'down':'');
       showBadge('badge-real');
-      const dir = chg>0.01?'rising':chg<-0.01?'falling':'stable';
-      setSeg('real', dir, dir==='falling'?'bull':dir==='stable'?'neut':'bear', true);
-      document.getElementById('hint-real').textContent = 'Real yield: '+cur.toFixed(2)+'% — '+(cur<0?'Negative · supportive for gold & growth':cur<1?'Low positive · neutral':cur<2?'Rising real rates · headwind for gold':'High real rates · strong headwind');
+      const dir=chg>0.01?'rising':chg<-0.01?'falling':'stable';
+      setSeg('real',dir,dir==='falling'?'bull':dir==='stable'?'neut':'bear',true);
+      document.getElementById('hint-real').textContent='Real yield: '+cur.toFixed(2)+'% — '+(cur<0?'Negative · supportive for gold & growth':cur<1?'Low positive · neutral':cur<2?'Rising real rates · headwind for gold':'High real rates · strong headwind');
     }
   }
 
-  function setFV(vid, v, cid, c, cls) {
+  function setFV(vid,v,cid,c,cls) {
     const el=document.getElementById(vid); if(el){el.textContent=v;el.classList.add('loaded');}
     const cel=document.getElementById(cid); if(cel){cel.textContent=c;cel.className='fred-field-sub'+(cls?' '+cls:'');}
   }
   function showBadge(id){const e=document.getElementById(id);if(e)e.classList.add('visible');}
 
   // ── SEGMENT BUTTONS ───────────────────────────────────────────────
-  function setSeg(group, value, type, isAuto) {
-    segState[group] = {value, type};
+  function setSeg(group,value,type,isAuto) {
+    segState[group]={value,type};
     document.querySelectorAll('[id^="'+group+'-"]').forEach(b=>b.className='seg-btn');
-    const btn=document.getElementById(group+'-'+value);
-    if(btn) btn.classList.add('active-'+type);
+    const btn=document.getElementById(group+'-'+value); if(btn)btn.classList.add('active-'+type);
     const dot=document.getElementById('dot-'+group);
     if(dot){dot.className='card-status';dot.classList.add(type==='bull'?'bullish':type==='neut'?'neutral':'bearish');}
     autoEval();
@@ -761,10 +1087,7 @@
       else if(vix<35){dot.classList.add('bearish');hint.textContent=vix+' — Elevated stress. Reduce exposure.';}
       else{dot.classList.add('bearish');hint.textContent=vix+' — PANIC. Crisis mode.';}
     }
-    if(!isNaN(hy)){
-      const dot=document.getElementById('dot-hy');dot.className='card-status';
-      dot.classList.add(hy<350?'bullish':hy<500?'neutral':'bearish');
-    }
+    if(!isNaN(hy)){const dot=document.getElementById('dot-hy');dot.className='card-status';dot.classList.add(hy<350?'bullish':hy<500?'neutral':'bearish');}
     if(!isNaN(move)){
       const dot=document.getElementById('dot-move'),hint=document.getElementById('hint-move');
       dot.className='card-status';
@@ -775,84 +1098,27 @@
     }
   }
 
-  // ── EVALUATE ─────────────────────────────────────────────────────
+  // ── EVALUATE REGIME ───────────────────────────────────────────────
   function evaluateRegime() {
     const vix=parseFloat(document.getElementById('vix').value);
     const hy=parseFloat(document.getElementById('hy').value);
     const move=parseFloat(document.getElementById('move').value);
-    let score=0, total=0, checks=[];
+    let score=0,total=0,checks=[];
 
-    // VIX level
-    if(!isNaN(vix)){total++;
-      if(vix<15){score+=1;checks.push({t:'bull',i:'✓',tx:'VIX '+vix+' — Calm. Sub-15 = risk-on environment.',s:'RISK-ON'});}
-      else if(vix<25){score+=0.5;checks.push({t:'neut',i:'~',tx:'VIX '+vix+' — Normal. No extreme signal.',s:'NEUTRAL'});}
-      else if(vix<35){checks.push({t:'bear',i:'✗',tx:'VIX '+vix+' — Elevated stress. Reduce gross exposure.',s:'CAUTION'});}
-      else{checks.push({t:'bear',i:'✗',tx:'VIX '+vix+' — PANIC level. Cash is king.',s:'RISK-OFF'});}}
-    // VIX term
-    if(segState.vixterm){total++;const v=segState.vixterm;
-      if(v.value==='contango'){score+=1;checks.push({t:'bull',i:'✓',tx:'VIX in contango — calm, no hedging panic.',s:'RISK-ON'});}
-      else if(v.value==='flat'){score+=0.5;checks.push({t:'neut',i:'~',tx:'VIX term structure flat — transitioning.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'VIX in backwardation — fear elevated, hedging demand spiking.',s:'RISK-OFF'});}}
-    // MOVE
-    if(!isNaN(move)){total++;
-      if(move<80){score+=1;checks.push({t:'bull',i:'✓',tx:'MOVE '+move+' — Bond vol calm. No rate stress signal.',s:'RISK-ON'});}
-      else if(move<120){score+=0.5;checks.push({t:'neut',i:'~',tx:'MOVE '+move+' — Normal. Typical uncertainty range.',s:'NEUTRAL'});}
-      else if(move<150){checks.push({t:'bear',i:'✗',tx:'MOVE '+move+' — Elevated bond vol. Watch for equity spillover.',s:'CAUTION'});}
-      else{checks.push({t:'bear',i:'✗',tx:'MOVE '+move+' — High bond stress. Equity vol likely to follow.',s:'RISK-OFF'});}}
-    // MOVE direction
-    if(segState.movedirn){total++;const v=segState.movedirn;
-      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'MOVE falling — bond vol easing. Rate stress reducing.',s:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'MOVE stable — no directional bond vol signal.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'MOVE rising — early warning. Bond vol often leads equity vol.',s:'CAUTION'});}}
-    // HY spread
-    if(!isNaN(hy)){total++;
-      if(hy<350){score+=1;checks.push({t:'bull',i:'✓',tx:'HY '+hy+'bps — Credit relaxed. Risk appetite healthy.',s:'RISK-ON'});}
-      else if(hy<500){score+=0.5;checks.push({t:'neut',i:'~',tx:'HY '+hy+'bps — Caution zone. Monitor for widening.',s:'CAUTION'});}
-      else{checks.push({t:'bear',i:'✗',tx:'HY '+hy+'bps — Risk-off. Credit stress elevated.',s:'RISK-OFF'});}}
-    // HY direction
-    if(segState.hydirn){total++;const v=segState.hydirn;
-      if(v.value==='tightening'){score+=1;checks.push({t:'bull',i:'✓',tx:'Spreads tightening — risk appetite expanding.',s:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Spreads stable — no strong directional signal.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'Spreads widening — early warning. Watch >20bps/day.',s:'CAUTION'});}}
-    // JPY
-    if(segState.jpy){total++;const v=segState.jpy;
-      if(v.value==='weakening'){score+=1;checks.push({t:'bull',i:'✓',tx:'JPY weakening — carry intact. Risk appetite supportive.',s:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'JPY stable — no carry unwind signal.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'JPY strengthening — carry unwind in progress. Risk-off flows.',s:'RISK-OFF'});}}
-    // AUD/JPY
-    if(segState.audjpy){total++;const v=segState.audjpy;
-      if(v.value==='rising'){score+=1;checks.push({t:'bull',i:'✓',tx:'AUD/JPY rising — risk-on proxy confirming appetite.',s:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'AUD/JPY stable — no strong regime signal.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'AUD/JPY falling — risk-off / carry unwind signal.',s:'RISK-OFF'});}}
-    // DXY
-    if(segState.dxy){total++;const v=segState.dxy;
-      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'DXY falling — risk-on. EM, commodities & growth supportive.',s:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'DXY stable — no strong dollar regime signal.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'DXY rising — headwind for EM, commodities & risk assets.',s:'CAUTION'});}}
-    // 2Y direction
-    if(segState.y2dirn){total++;const v=segState.y2dirn;
-      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'2Y yield falling — easier conditions being priced in.',s:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'2Y yield stable — no strong rate direction signal.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'2Y yield rising — tighter conditions ahead. Headwind for risk.',s:'CAUTION'});}}
-    // Curve
-    if(segState.curve){total++;const v=segState.curve;
-      if(v.value==='steep'){score+=1;checks.push({t:'bull',i:'✓',tx:'Curve steep — healthy growth expectations.',s:'RISK-ON'});}
-      else if(v.value==='flat'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Curve flat — slowing growth. Watch for inversion.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'Curve inverted — recession signal. 6-18m lead time.',s:'WARNING'});}}
-    // Real yield
-    if(segState.real){total++;const v=segState.real;
-      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'Real yields falling — tailwind for gold & growth stocks.',s:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Real yields stable — neutral for gold & growth.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'Real yields rising — headwind for gold & growth stocks.',s:'CAUTION'});}}
-    // Correlation
-    if(segState.corr){total++;const v=segState.corr;
-      if(v.value==='negative'){score+=1;checks.push({t:'bull',i:'✓',tx:'Stocks/bonds negative correlation — normal regime.',s:'NORMAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'Stocks/bonds positive — inflation regime / relationships broken.',s:'STRESS'});}}
-    // Gold
-    if(segState.gold){total++;const v=segState.gold;
-      if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'Gold falling — no flight-to-quality. Real rates supportive.',s:'RISK-ON'});}
-      else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Gold stable — no strong safe-haven signal.',s:'NEUTRAL'});}
-      else{checks.push({t:'bear',i:'✗',tx:'Gold rising — flight-to-quality forming. Check real yields.',s:'CAUTION'});}}
+    if(!isNaN(vix)){total++;if(vix<15){score+=1;checks.push({t:'bull',i:'✓',tx:'VIX '+vix+' — Calm. Sub-15 = risk-on environment.',s:'RISK-ON'});}else if(vix<25){score+=0.5;checks.push({t:'neut',i:'~',tx:'VIX '+vix+' — Normal. No extreme signal.',s:'NEUTRAL'});}else if(vix<35){checks.push({t:'bear',i:'✗',tx:'VIX '+vix+' — Elevated stress. Reduce gross exposure.',s:'CAUTION'});}else{checks.push({t:'bear',i:'✗',tx:'VIX '+vix+' — PANIC level. Cash is king.',s:'RISK-OFF'});}}
+    if(segState.vixterm){total++;const v=segState.vixterm;if(v.value==='contango'){score+=1;checks.push({t:'bull',i:'✓',tx:'VIX in contango — calm, no hedging panic.',s:'RISK-ON'});}else if(v.value==='flat'){score+=0.5;checks.push({t:'neut',i:'~',tx:'VIX term structure flat — transitioning.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'VIX in backwardation — fear elevated, hedging demand spiking.',s:'RISK-OFF'});}}
+    if(!isNaN(move)){total++;if(move<80){score+=1;checks.push({t:'bull',i:'✓',tx:'MOVE '+move+' — Bond vol calm.',s:'RISK-ON'});}else if(move<120){score+=0.5;checks.push({t:'neut',i:'~',tx:'MOVE '+move+' — Normal range.',s:'NEUTRAL'});}else if(move<150){checks.push({t:'bear',i:'✗',tx:'MOVE '+move+' — Elevated bond vol.',s:'CAUTION'});}else{checks.push({t:'bear',i:'✗',tx:'MOVE '+move+' — High bond stress.',s:'RISK-OFF'});}}
+    if(segState.movedirn){total++;const v=segState.movedirn;if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'MOVE falling — bond vol easing.',s:'RISK-ON'});}else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'MOVE stable — no directional signal.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'MOVE rising — early warning signal.',s:'CAUTION'});}}
+    if(!isNaN(hy)){total++;if(hy<350){score+=1;checks.push({t:'bull',i:'✓',tx:'HY '+hy+'bps — Credit relaxed.',s:'RISK-ON'});}else if(hy<500){score+=0.5;checks.push({t:'neut',i:'~',tx:'HY '+hy+'bps — Caution zone.',s:'CAUTION'});}else{checks.push({t:'bear',i:'✗',tx:'HY '+hy+'bps — Risk-off. Credit stress.',s:'RISK-OFF'});}}
+    if(segState.hydirn){total++;const v=segState.hydirn;if(v.value==='tightening'){score+=1;checks.push({t:'bull',i:'✓',tx:'Spreads tightening — risk appetite expanding.',s:'RISK-ON'});}else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Spreads stable.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'Spreads widening — early warning.',s:'CAUTION'});}}
+    if(segState.jpy){total++;const v=segState.jpy;if(v.value==='weakening'){score+=1;checks.push({t:'bull',i:'✓',tx:'JPY weakening — carry intact.',s:'RISK-ON'});}else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'JPY stable.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'JPY strengthening — carry unwind.',s:'RISK-OFF'});}}
+    if(segState.audjpy){total++;const v=segState.audjpy;if(v.value==='rising'){score+=1;checks.push({t:'bull',i:'✓',tx:'AUD/JPY rising — risk-on proxy confirming.',s:'RISK-ON'});}else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'AUD/JPY stable.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'AUD/JPY falling — risk-off signal.',s:'RISK-OFF'});}}
+    if(segState.dxy){total++;const v=segState.dxy;if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'DXY falling — risk-on supportive.',s:'RISK-ON'});}else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'DXY stable.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'DXY rising — headwind for risk assets.',s:'CAUTION'});}}
+    if(segState.y2dirn){total++;const v=segState.y2dirn;if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'2Y yield falling — easier conditions.',s:'RISK-ON'});}else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'2Y yield stable.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'2Y yield rising — tighter conditions.',s:'CAUTION'});}}
+    if(segState.curve){total++;const v=segState.curve;if(v.value==='steep'){score+=1;checks.push({t:'bull',i:'✓',tx:'Curve steep — healthy growth expectations.',s:'RISK-ON'});}else if(v.value==='flat'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Curve flat — slowing growth.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'Curve inverted — recession signal.',s:'WARNING'});}}
+    if(segState.real){total++;const v=segState.real;if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'Real yields falling — tailwind for gold & growth.',s:'RISK-ON'});}else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Real yields stable.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'Real yields rising — headwind for gold & growth.',s:'CAUTION'});}}
+    if(segState.corr){total++;const v=segState.corr;if(v.value==='negative'){score+=1;checks.push({t:'bull',i:'✓',tx:'Stocks/bonds negative correlation — normal regime.',s:'NORMAL'});}else{checks.push({t:'bear',i:'✗',tx:'Stocks/bonds positive — inflation regime / stress.',s:'STRESS'});}}
+    if(segState.gold){total++;const v=segState.gold;if(v.value==='falling'){score+=1;checks.push({t:'bull',i:'✓',tx:'Gold falling — no flight-to-quality.',s:'RISK-ON'});}else if(v.value==='stable'){score+=0.5;checks.push({t:'neut',i:'~',tx:'Gold stable.',s:'NEUTRAL'});}else{checks.push({t:'bear',i:'✗',tx:'Gold rising — flight-to-quality forming.',s:'CAUTION'});}}
 
     if(total===0){alert('Please enter at least one reading.');return;}
     const pct=score/total;
@@ -861,7 +1127,6 @@
     else if(pct>=0.35){regime='NEUTRAL / MIXED';cls='neutral';note='Mixed signals. Reduce size on speculative positions.';}
     else{regime='RISK-OFF';cls='risk-off';note='3+ indicators warning. Reduce gross exposure.';}
     const sc=Math.round(pct*100);
-
     const riskBanner=document.getElementById('riskBanner');
     riskBanner.className='regime-banner '+cls;
     document.getElementById('riskValue').textContent=regime;
@@ -869,26 +1134,19 @@
     const circle=document.getElementById('scoreCircle');
     circle.textContent=sc;
     circle.style.color=pct>=0.65?'var(--green)':pct>=0.35?'var(--amber)':'var(--red)';
-
-    // Scroll to banner row and pulse
-    const bannerRow = document.getElementById('bannerRow');
-    if (bannerRow) {
-      setTimeout(() => {
-        bannerRow.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 80);
-      // Pick pulse colour based on risk regime
-      const pulseClass = pct>=0.65 ? 'pulse-green' : pct>=0.35 ? 'pulse-amber' : 'pulse-red';
-      // Pick quadrant pulse colour
-      const qPulse = quadrantState==='deflation' ? 'pulse-blue' : quadrantState==='goldilocks' ? 'pulse-green' : quadrantState==='reflation' ? 'pulse-amber' : quadrantState ? 'pulse-red' : pulseClass;
-      [document.getElementById('riskBanner'), document.getElementById('quadrantBanner')].forEach((el, i) => {
-        if (!el) return;
+    const bannerRow=document.getElementById('bannerRow');
+    if(bannerRow){
+      setTimeout(()=>bannerRow.scrollIntoView({behavior:'smooth',block:'start'}),80);
+      const pulseClass=pct>=0.65?'pulse-green':pct>=0.35?'pulse-amber':'pulse-red';
+      const qPulse=quadrantState==='deflation'?'pulse-blue':quadrantState==='goldilocks'?'pulse-green':quadrantState==='reflation'?'pulse-amber':quadrantState?'pulse-red':pulseClass;
+      [document.getElementById('riskBanner'),document.getElementById('quadrantBanner')].forEach((el,i)=>{
+        if(!el)return;
         el.classList.remove('pulse-green','pulse-amber','pulse-red','pulse-blue');
-        void el.offsetWidth; // force reflow so animation restarts
-        el.classList.add(i===0 ? pulseClass : qPulse);
-        el.addEventListener('animationend', () => el.classList.remove('pulse-green','pulse-amber','pulse-red','pulse-blue'), { once: true });
+        void el.offsetWidth;
+        el.classList.add(i===0?pulseClass:qPulse);
+        el.addEventListener('animationend',()=>el.classList.remove('pulse-green','pulse-amber','pulse-red','pulse-blue'),{once:true});
       });
     }
-
     const cl=document.getElementById('checklist');cl.innerHTML='';
     checks.forEach((c,i)=>{
       const d=document.createElement('div');
@@ -900,7 +1158,7 @@
     addLog(regime,cls,sc,total);
   }
 
-  // ── LOG ───────────────────────────────────────────────────────────
+  // ── SESSION LOG ───────────────────────────────────────────────────
   const log=[];
   function addLog(regime,cls,score,indicators){
     const now=new Date();
@@ -921,39 +1179,25 @@
 
   // ── RESET ─────────────────────────────────────────────────────────
   function resetAll(){
-    ['vix','hy','yield2y','move'].forEach(id=>{
-      const el=document.getElementById(id);if(el){el.value='';el.classList.remove('autofilled');}
-    });
+    ['vix','hy','yield2y','move'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('autofilled');}});
     ['vixterm','movedirn','hydirn','jpy','audjpy','dxy','y2dirn','curve','real','corr','gold'].forEach(g=>{
       delete segState[g];
       document.querySelectorAll('[id^="'+g+'-"]').forEach(b=>b.className='seg-btn');
       const dot=document.getElementById('dot-'+g);if(dot)dot.className='card-status';
     });
     ['dot-vix','dot-hy','dot-2y','dot-move'].forEach(id=>{const d=document.getElementById(id);if(d)d.className='card-status';});
-    ['badge-hy','badge-hydirn','badge-2y','badge-2ydirn','badge-curve','badge-real'].forEach(id=>{
-      const b=document.getElementById(id);if(b)b.classList.remove('visible');
-    });
-    ['fred-2y','fred-curve','fred-hy','fred-real'].forEach(id=>{
-      const el=document.getElementById(id);if(el){el.textContent='—';el.classList.remove('loaded');}
-    });
-    ['fred-2y-chg','fred-curve-chg','fred-hy-chg','fred-real-chg'].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.textContent='';
-    });
-    // Reset quadrant
-    growthState=null; inflationState=null; quadrantState=null;
-    ['goldilocks','reflation','stagflation','deflation'].forEach(n=>{
-      const c=document.getElementById('cell-'+n);if(c)c.className='quadrant-cell';
-    });
-    ['growth-accelerating','growth-decelerating','inflation-rising','inflation-falling'].forEach(id=>{
-      const b=document.getElementById(id);if(b)b.className='seg-btn';
-    });
+    ['badge-hy','badge-hydirn','badge-2y','badge-2ydirn','badge-curve','badge-real'].forEach(id=>{const b=document.getElementById(id);if(b)b.classList.remove('visible');});
+    ['fred-2y','fred-curve','fred-hy','fred-real'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent='—';el.classList.remove('loaded');}});
+    ['fred-2y-chg','fred-curve-chg','fred-hy-chg','fred-real-chg'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='';});
+    growthState=null;inflationState=null;quadrantState=null;
+    ['goldilocks','reflation','stagflation','deflation'].forEach(n=>{const c=document.getElementById('cell-'+n);if(c)c.className='quadrant-cell';});
+    ['growth-accelerating','growth-decelerating','inflation-rising','inflation-falling'].forEach(id=>{const b=document.getElementById(id);if(b)b.className='seg-btn';});
     document.getElementById('quadrantName').textContent='Select growth & inflation above';
     document.getElementById('quadrantName').style.color='';
     document.getElementById('quadrantImplications').textContent='';
     document.getElementById('quadrantBanner').className='regime-banner pending';
     document.getElementById('quadrantBannerValue').textContent='NOT SET';
     document.getElementById('quadrantBannerNote').textContent='Select growth & inflation direction above';
-    // Reset banners
     document.getElementById('riskBanner').className='regime-banner pending';
     document.getElementById('riskValue').textContent='AWAITING INPUT';
     document.getElementById('riskNote').textContent='Enter data & evaluate';
@@ -969,8 +1213,292 @@
     document.getElementById('fetchStatus').className='fetch-status';
     document.getElementById('fetchBtn').textContent='▼ Load FRED Data';
     document.getElementById('fetchBtn').disabled=false;
-    fredLoaded=false;
-    Object.keys(fredData).forEach(k=>delete fredData[k]);
+    fredLoaded=false; Object.keys(fredData).forEach(k=>delete fredData[k]);
+  }
+
+  // ── WEEKLY BIAS ───────────────────────────────────────────────────
+  const BIAS_INFO = {
+    expansion: { text: '📈 EXPANSION WEEK — ATR elevated, large daily ranges expected.\n▸ Widen stops to 1.5-2x ATR to avoid noise hits\n▸ Reduce position size significantly (formula handles this)\n▸ Expect follow-through on breakouts\n▸ Avoid mean reversion strategies\n▸ Wait for clear momentum — do not trade the open', cls: 'expansion' },
+    normal:    { text: '➡ NORMAL WEEK — ATR at average levels, standard conditions.\n▸ Standard stops at 1x ATR\n▸ Normal position sizing per formula\n▸ Both trend and mean reversion viable\n▸ All session types tradeable', cls: 'normal' },
+    contraction:{ text: '📉 CONTRACTION WEEK — ATR low, tight ranges expected.\n▸ Tighter stops viable (0.75x ATR)\n▸ Can increase position size slightly\n▸ Favour mean reversion / range strategies\n▸ Breakouts likely to fail — be cautious\n▸ Low vol often precedes vol expansion — stay alert', cls: 'contraction' }
+  };
+
+  function setWeeklyBias(val) {
+    weeklyBias = val;
+    ['expansion','normal','contraction'].forEach(v => {
+      document.getElementById('bias-'+v).className = 'bias-seg-btn' + (v===val?' active-'+v:'');
+    });
+    const info = BIAS_INFO[val];
+    const el = document.getElementById('biasDisplay');
+    el.textContent = info.text;
+    el.className = 'bias-display ' + info.cls;
+  }
+
+  // ── ATR POSITION SIZER ────────────────────────────────────────────
+  function calcSizing() {
+    const nqATR    = parseFloat(document.getElementById('nq-atr').value);
+    const goldATR  = parseFloat(document.getElementById('gold-atr').value);
+    const topBuf   = parseFloat(document.getElementById('nq-topstep-buffer').value);
+    const ufBuf    = parseFloat(document.getElementById('nq-ufunded-buffer').value);
+    const riskPct  = parseFloat(document.getElementById('risk-pct').value) || 1;
+    const stopMult = parseFloat(document.getElementById('stop-mult').value) || 1;
+
+    const hasNQ   = !isNaN(nqATR) && nqATR > 0;
+    const hasGold = !isNaN(goldATR) && goldATR > 0;
+    const hasAny  = hasNQ || hasGold;
+
+    if (!hasAny) { document.getElementById('sizingOutput').style.display='none'; return; }
+    document.getElementById('sizingOutput').style.display='block';
+
+    // NQ Topstep
+    if (hasNQ && !isNaN(topBuf) && topBuf > 0) {
+      const stopDist = nqATR * stopMult;
+      const riskDollar = topBuf * (riskPct / 100);
+      // MNQ = $2/pt, NQ = $20/pt
+      const mnqRisk = stopDist * 2;
+      const maxContracts = Math.max(0, Math.floor(riskDollar / mnqRisk));
+      const actualRisk = maxContracts * mnqRisk;
+      document.getElementById('out-nq-topstep').textContent = maxContracts + ' MNQ';
+      document.getElementById('out-nq-topstep').className = 'sizing-result-value ' + getVolClass(nqATR);
+      document.getElementById('out-nq-topstep-sub').textContent = '$'+actualRisk.toFixed(0)+' risk · Stop '+stopDist.toFixed(0)+' pts';
+      document.getElementById('out-nq-topstep-regime').innerHTML = '<span class="atr-regime-badge '+getVolClass(nqATR)+'">'+getVolLabel(nqATR)+' vol</span>';
+    } else {
+      document.getElementById('out-nq-topstep').textContent = '—';
+      document.getElementById('out-nq-topstep-sub').textContent = 'Enter Topstep buffer';
+    }
+
+    // NQ Ufunded
+    if (hasNQ && !isNaN(ufBuf) && ufBuf > 0) {
+      const stopDist = nqATR * stopMult;
+      const riskDollar = ufBuf * (riskPct / 100);
+      const mnqRisk = stopDist * 2;
+      const maxContracts = Math.max(0, Math.floor(riskDollar / mnqRisk));
+      const actualRisk = maxContracts * mnqRisk;
+      document.getElementById('out-nq-ufunded').textContent = maxContracts + ' MNQ';
+      document.getElementById('out-nq-ufunded').className = 'sizing-result-value ' + getVolClass(nqATR);
+      document.getElementById('out-nq-ufunded-sub').textContent = '$'+actualRisk.toFixed(0)+' risk · Stop '+stopDist.toFixed(0)+' pts';
+      document.getElementById('out-nq-ufunded-regime').innerHTML = '<span class="atr-regime-badge '+getVolClass(nqATR)+'">'+getVolLabel(nqATR)+' vol</span>';
+    } else {
+      document.getElementById('out-nq-ufunded').textContent = '—';
+      document.getElementById('out-nq-ufunded-sub').textContent = 'Enter Ufunded buffer';
+    }
+
+    // Gold stop distance
+    if (hasGold) {
+      const stopDist = goldATR * stopMult;
+      document.getElementById('out-gold-stop').textContent = stopDist.toFixed(1) + ' pts';
+      document.getElementById('out-gold-stop').className = 'sizing-result-value ' + getGoldVolClass(goldATR);
+      document.getElementById('out-gold-stop-sub').textContent = 'MGC ($1/pt): $'+stopDist.toFixed(0)+' risk · Full Gold ($10/pt): $'+(stopDist*10).toFixed(0);
+      document.getElementById('out-gold-regime').innerHTML = '<span class="atr-regime-badge '+getGoldVolClass(goldATR)+'">'+getGoldVolLabel(goldATR)+' vol</span>';
+    } else {
+      document.getElementById('out-gold-stop').textContent = '—';
+    }
+
+    // NQ expected range
+    if (hasNQ) {
+      document.getElementById('out-nq-range').textContent = nqATR.toFixed(0) + ' pts';
+      document.getElementById('out-nq-range').className = 'sizing-result-value ' + getVolClass(nqATR);
+      document.getElementById('out-nq-range-sub').textContent = 'Approx. $'+(nqATR * 20).toFixed(0)+' per NQ contract';
+    }
+
+    // Update dots
+    if (hasNQ) { document.getElementById('dot-nq-atr').className = 'card-status ' + (getVolClass(nqATR)==='vol-low'?'bullish':getVolClass(nqATR)==='vol-normal'?'neutral':'bearish'); }
+    if (hasGold) { document.getElementById('dot-gold-atr').className = 'card-status ' + (getGoldVolClass(goldATR)==='low'?'bullish':getGoldVolClass(goldATR)==='normal'?'neutral':'bearish'); }
+  }
+
+  function getVolClass(atr) {
+    if (atr < 200) return 'vol-low';
+    if (atr < 350) return 'vol-normal';
+    if (atr < 500) return 'vol-elevated';
+    return 'vol-high';
+  }
+  function getVolLabel(atr) {
+    if (atr < 200) return 'Low';
+    if (atr < 350) return 'Normal';
+    if (atr < 500) return 'Elevated';
+    return 'High';
+  }
+  function getGoldVolClass(atr) {
+    if (atr < 80) return 'low';
+    if (atr < 130) return 'normal';
+    if (atr < 180) return 'elevated';
+    return 'high';
+  }
+  function getGoldVolLabel(atr) {
+    if (atr < 80) return 'Low';
+    if (atr < 130) return 'Normal';
+    if (atr < 180) return 'Elevated';
+    return 'High';
+  }
+
+  // ── OI VISUAL ─────────────────────────────────────────────────────
+  function updateOIVisual() {
+    const cw = parseFloat(document.getElementById('oi-call-wall').value);
+    const pw = parseFloat(document.getElementById('oi-put-wall').value);
+    const mp = parseFloat(document.getElementById('oi-max-pain').value);
+    const cp = parseFloat(document.getElementById('oi-current').value);
+
+    if (isNaN(cw) || isNaN(pw)) return;
+
+    const lo = pw - (cw - pw) * 0.1;
+    const hi = cw + (cw - pw) * 0.1;
+    const range = hi - lo;
+
+    const pct = v => Math.max(2, Math.min(98, ((v - lo) / range) * 100));
+
+    document.getElementById('oiPutLine').style.left  = pct(pw) + '%';
+    document.getElementById('oiCallLine').style.left = pct(cw) + '%';
+    if (!isNaN(mp)) document.getElementById('oiPainLine').style.left   = pct(mp) + '%';
+    if (!isNaN(cp)) document.getElementById('oiCurrentLine').style.left = pct(cp) + '%';
+
+    // Fill between put and call wall
+    const fillLeft  = pct(pw);
+    const fillWidth = pct(cw) - pct(pw);
+    document.getElementById('oiBarFill').style.left  = fillLeft + '%';
+    document.getElementById('oiBarFill').style.width = fillWidth + '%';
+
+    // Position text
+    let text = '';
+    if (!isNaN(cp)) {
+      if (cp > cw) text = '⚡ Price ABOVE call wall — gamma squeeze territory. Watch for rapid move or sharp reversal.';
+      else if (cp < pw) text = '⚠ Price BELOW put wall — dealer selling amplifying decline. Caution on longs.';
+      else {
+        const distToCall = cw - cp;
+        const distToPut  = cp - pw;
+        const totalRange = cw - pw;
+        const pctOfRange = ((cp - pw) / totalRange * 100).toFixed(0);
+        text = '✓ Price within range (' + pctOfRange + '% between walls). ';
+        if (!isNaN(mp)) {
+          if (cp < mp) text += 'Below max pain (' + mp.toFixed(0) + ') — gravitational pull upward near expiry.';
+          else if (cp > mp) text += 'Above max pain (' + mp.toFixed(0) + ') — gravitational pull downward near expiry.';
+          else text += 'At max pain — minimal directional pull.';
+        }
+        text += '\nCall wall: ' + cw.toFixed(0) + ' (+' + distToCall.toFixed(0) + ' pts) · Put wall: ' + pw.toFixed(0) + ' (-' + distToPut.toFixed(0) + ' pts)';
+      }
+    } else {
+      text = 'Range: ' + pw.toFixed(0) + ' — ' + cw.toFixed(0) + ' (' + (cw - pw).toFixed(0) + ' pts)' + (!isNaN(mp) ? ' · Max Pain: ' + mp.toFixed(0) : '');
+    }
+    document.getElementById('oiPositionText').textContent = text;
+  }
+
+  // ── TRADE LOG (with persistent storage) ───────────────────────────
+  let trades = [];
+
+  async function loadTrades() {
+    try {
+      const result = await window.storage.get('cog-trades');
+      if (result && result.value) {
+        trades = JSON.parse(result.value);
+        renderTrades();
+        updateStats();
+      }
+    } catch(e) {
+      trades = [];
+    }
+  }
+
+  async function saveTrades() {
+    try {
+      await window.storage.set('cog-trades', JSON.stringify(trades));
+    } catch(e) {
+      console.error('Save failed:', e);
+    }
+  }
+
+  function calcR(entry, stop, exit, direction) {
+    if (isNaN(entry) || isNaN(stop) || isNaN(exit)) return null;
+    const riskPerUnit = Math.abs(entry - stop);
+    if (riskPerUnit === 0) return null;
+    const pnlPerUnit = direction === 'Long' ? (exit - entry) : (entry - exit);
+    return pnlPerUnit / riskPerUnit;
+  }
+
+  function addTrade() {
+    const date      = document.getElementById('tl-date').value;
+    const instrument= document.getElementById('tl-instrument').value;
+    const account   = document.getElementById('tl-account').value;
+    const direction = document.getElementById('tl-direction').value;
+    const entry     = parseFloat(document.getElementById('tl-entry').value);
+    const stop      = parseFloat(document.getElementById('tl-stop').value);
+    const target    = parseFloat(document.getElementById('tl-target').value);
+    const exit      = parseFloat(document.getElementById('tl-exit').value);
+    const result    = document.getElementById('tl-result').value;
+    const notes     = document.getElementById('tl-notes').value;
+
+    if (!date || isNaN(entry) || isNaN(stop)) {
+      alert('Please enter at least date, entry and stop.'); return;
+    }
+
+    const r = calcR(entry, stop, exit, direction);
+    const trade = { id: Date.now(), date, instrument, account, direction, entry, stop, target, exit, result, notes, r };
+    trades.unshift(trade);
+    saveTrades();
+    renderTrades();
+    updateStats();
+
+    // Clear form
+    ['tl-entry','tl-stop','tl-target','tl-exit','tl-notes'].forEach(id => { document.getElementById(id).value = ''; });
+  }
+
+  function deleteTrade(id) {
+    trades = trades.filter(t => t.id !== id);
+    saveTrades();
+    renderTrades();
+    updateStats();
+  }
+
+  function renderTrades() {
+    const tbody = document.getElementById('tradeTableBody');
+    if (trades.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state">No trades logged yet. Add your first trade above.</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = trades.map(t => {
+      const rVal = t.r !== null && t.r !== undefined ? t.r.toFixed(2) : '—';
+      const rClass = t.r > 0 ? 'r-positive' : t.r < 0 ? 'r-negative' : 'r-neutral';
+      const dirClass = t.direction === 'Long' ? 'dir-long' : 'dir-short';
+      return `<tr>
+        <td>${t.date}</td>
+        <td>${t.instrument}</td>
+        <td>${t.account}</td>
+        <td class="${dirClass}">${t.direction}</td>
+        <td>${t.entry || '—'}</td>
+        <td>${t.stop || '—'}</td>
+        <td>${t.target || '—'}</td>
+        <td>${t.exit || '—'}</td>
+        <td class="${rClass}">${rVal}R</td>
+        <td>${t.result}</td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${t.notes || ''}</td>
+        <td><button class="delete-trade-btn" onclick="deleteTrade(${t.id})">✕</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function updateStats() {
+    const total = trades.length;
+    const closed = trades.filter(t => t.result !== 'Open' && t.r !== null && t.r !== undefined);
+    const wins = closed.filter(t => t.r > 0).length;
+    const winRate = closed.length > 0 ? ((wins / closed.length) * 100).toFixed(0) + '%' : '—';
+    const avgR = closed.length > 0 ? (closed.reduce((s, t) => s + (t.r || 0), 0) / closed.length).toFixed(2) + 'R' : '—';
+    const rs = closed.map(t => t.r).filter(r => r !== null);
+    const best = rs.length > 0 ? Math.max(...rs).toFixed(2) + 'R' : '—';
+    const worst = rs.length > 0 ? Math.min(...rs).toFixed(2) + 'R' : '—';
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-winrate').textContent = winRate;
+    const avgEl = document.getElementById('stat-avgr');
+    avgEl.textContent = avgR;
+    avgEl.className = 'stat-box-value' + (parseFloat(avgR) > 0 ? ' positive' : parseFloat(avgR) < 0 ? ' negative' : '');
+    document.getElementById('stat-best').textContent = best;
+    document.getElementById('stat-worst').textContent = worst;
+  }
+
+  async function clearTrades() {
+    if (!confirm('Clear all trade history? This cannot be undone.')) return;
+    trades = [];
+    try { await window.storage.delete('cog-trades'); } catch(e) {}
+    renderTrades();
+    updateStats();
   }
 
   // ── CLOCK ─────────────────────────────────────────────────────────
@@ -980,6 +1508,12 @@
     document.getElementById('timeDisplay').textContent=now.toLocaleTimeString('en-GB')+' GMT';
   }
   updateClock(); setInterval(updateClock,1000);
+
+  // ── SET DEFAULT DATE ───────────────────────────────────────────────
+  document.getElementById('tl-date').value = new Date().toISOString().split('T')[0];
+
+  // ── INIT ──────────────────────────────────────────────────────────
+  loadTrades();
 </script>
 </body>
 </html>
